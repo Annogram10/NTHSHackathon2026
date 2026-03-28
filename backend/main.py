@@ -18,7 +18,7 @@ from pydantic import BaseModel, Field
 from services.source_service import (
     fetch_article_metadata,
     search_all_sources,
-    verify_claim_with_wikipedia,
+    verify_claim_with_sources,
 )
 
 app = FastAPI(title="CredCheck API", version="1.0.0")
@@ -98,7 +98,6 @@ _history: List[AnalysisResult] = []
 HIGH_CREDIBILITY_DOMAINS = {
     "apnews.com": 88,
     "bbc.com": 86,
-    "britannica.com": 95,
     "cdc.gov": 96,
     "nasa.gov": 97,
     "nbcnews.com": 84,
@@ -107,7 +106,6 @@ HIGH_CREDIBILITY_DOMAINS = {
     "nytimes.com": 84,
     "reuters.com": 92,
     "washingtonpost.com": 82,
-    "wikipedia.org": 88,
     "wsj.com": 84,
 }
 
@@ -210,12 +208,12 @@ def author_signal(author: Optional[str]) -> tuple[int, str]:
 
 
 def benchmark_signal(sources: List[Source]) -> dict:
-    """Score how much benchmark-source support was found."""
+    """Score how much trusted-source support was found."""
     if not sources:
         return {
             "score": 38,
             "confidence": 42,
-            "summary": "No benchmark matches were found in Wikipedia or Britannica for this query.",
+            "summary": "No matches were found from the configured trusted news and fact-check source APIs for this query.",
         }
 
     high_quality_count = sum(
@@ -229,7 +227,7 @@ def benchmark_signal(sources: List[Source]) -> dict:
         "score": score,
         "confidence": confidence,
         "summary": (
-            "Benchmark references found in "
+            "Trusted source matches found in "
             + ", ".join(publishers)
             + f" ({len(sources)} total source match{'es' if len(sources) != 1 else ''})."
         ),
@@ -384,7 +382,7 @@ def combine_analysis(
         )
     elif not why_misleading and not sources:
         why_misleading = (
-            "The claim could not be strongly benchmarked against Wikipedia or Britannica, so the result stays cautious."
+            "The claim could not be strongly supported by the configured trusted source APIs, so the result stays cautious."
         )
 
     bias_analysis = (
@@ -406,22 +404,18 @@ def combine_analysis(
 
 
 async def get_sources(claim: str, count: int = 3) -> List[Source]:
-    """Get real sources from Wikipedia and Britannica for the claim."""
+    """Get real sources from configured trusted APIs for the claim."""
     result = await search_all_sources(claim, limit_per_source=count)
     sources = []
 
     if result["found"]:
-        for article in result["articles"][:count * 2]:  # Get more since we have multiple sources
-            # Determine reliability based on source
-            if article.get("source_name") == "Wikipedia":
-                reliability = SourceReliability.HIGH
-                publisher = "Wikipedia"
-            elif article.get("source_name") == "Britannica":
-                reliability = SourceReliability.HIGH
-                publisher = "Britannica"
-            else:
-                reliability = SourceReliability.MEDIUM
-                publisher = article.get("source_name", "Unknown")
+        for article in result["articles"][: count * 2]:
+            reliability = (
+                SourceReliability.HIGH
+                if article.get("provider_reliability") == "high"
+                else SourceReliability.MEDIUM
+            )
+            publisher = article.get("source_name", "Unknown")
 
             sources.append(Source(
                 id=str(uuid.uuid4()),
@@ -521,7 +515,7 @@ async def analyze_claim(request: AnalysisRequest):
     # Get analysis based on claim content
     base_analysis = analyze_claim_content(effective_claim)
 
-    # Get real sources from Wikipedia and Britannica
+    # Get real sources from configured trusted source APIs
     sources = await get_sources(effective_claim)
     analysis = combine_analysis(
         claim=effective_claim,
@@ -596,10 +590,7 @@ async def get_analysis(analysis_id: str):
 
 @app.get("/api/verify-sources")
 async def verify_sources(q: str = Query(..., min_length=3, description="Claim or topic to verify")):
-    """Verify sources for a claim using Wikipedia and Britannica.
-
-    Returns relevant articles from public encyclopedic sources.
-    """
+    """Verify sources for a claim using configured trusted source APIs."""
     result = await search_all_sources(q, limit_per_source=5)
 
     if not result["found"]:
@@ -608,12 +599,11 @@ async def verify_sources(q: str = Query(..., min_length=3, description="Claim or
     sources = []
     for article in result["articles"]:
         source_name = article.get("source_name", "Unknown")
-        if source_name == "Wikipedia":
-            reliability = SourceReliability.HIGH
-        elif source_name == "Britannica":
-            reliability = SourceReliability.HIGH
-        else:
-            reliability = SourceReliability.MEDIUM
+        reliability = (
+            SourceReliability.HIGH
+            if article.get("provider_reliability") == "high"
+            else SourceReliability.MEDIUM
+        )
 
         sources.append(Source(
             id=str(uuid.uuid4()),
@@ -637,18 +627,18 @@ async def verify_sources(q: str = Query(..., min_length=3, description="Claim or
 
 @app.post("/api/verify-claim")
 async def verify_claim(request: AnalysisRequest):
-    """Verify a claim against Wikipedia and return source-backed facts.
+    """Verify a claim against configured trusted source APIs and return facts."""
+    if not request.claim or not request.claim.strip():
+        raise HTTPException(status_code=422, detail="A claim is required for verification.")
 
-    Returns factual information from Wikipedia that can be used to verify the claim.
-    """
-    # Extract keywords from claim for Wikipedia search
-    keywords = [w for w in request.claim.split() if len(w) > 4][:5]
-    verification = await verify_claim_with_wikipedia(keywords)
+    normalized_claim = request.claim.strip()
+    keywords = [w for w in normalized_claim.split() if len(w) > 4][:5]
+    verification = await verify_claim_with_sources(normalized_claim)
 
     return {
         "success": True,
         "data": {
-            "claim": request.claim,
+            "claim": normalized_claim,
             "keywords_searched": keywords,
             "verification": verification,
             "facts_found": len(verification.get("facts", [])),
