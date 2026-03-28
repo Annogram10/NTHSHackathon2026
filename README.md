@@ -1,6 +1,6 @@
 # NTHSHackathon2026
 
-Vouch ✅
+# Vouch ✅
 Don't share it until you Vouch for it.
 Vouch is an AI-powered Chrome extension that fact-checks any claim on the internet in one click. Highlight text, right-click, and instantly get a verdict backed by real sources, a trust score, and a plain-English explanation — right where you need it.
 
