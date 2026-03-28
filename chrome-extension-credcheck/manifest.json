@@ -1,13 +1,13 @@
 {
   "manifest_version": 3,
-  "name": "CredCheck - Credibility Checker",
+  "name": "Vouch - Credibility Checker",
   "version": "1.0.0",
   "description": "Real-time credibility analysis for news, social media, and articles. Get instant trust scores and source verification.",
   "permissions": [
     "activeTab",
     "storage",
-    "scripting",
-    "notifications"
+    "contextMenus",
+    "scripting"
   ],
   "host_permissions": [
     "http://localhost:8000/*",
@@ -20,7 +20,7 @@
       "48": "icons/icon48.png",
       "128": "icons/icon128.png"
     },
-    "default_title": "CredCheck - Verify credibility"
+    "default_title": "Vouch - Verify credibility"
   },
   "background": {
     "service_worker": "background/background.js",
@@ -41,7 +41,7 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["popup/*", "assets/*"],
+      "resources": ["popup/*", "icons/*"],
       "matches": ["<all_urls>"]
     }
   ]

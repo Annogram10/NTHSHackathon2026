@@ -646,6 +646,501 @@ async def verify_claim(request: AnalysisRequest):
     }
 
 
+# ============================================
+# SITE CREDIBILITY DATABASE
+# ============================================
+SITE_CREDIBILITY_DB = {
+    "cnn.com": {
+        "credibilityScore": 72, "credibilityVerdict": "Generally Reliable",
+        "editorialBias": "Left", "ownership": "Warner Bros. Discovery",
+        "funding": "Advertising, subscriptions", "transparencyScore": 78,
+        "factCheckTrackRecord": "Low rate of retractions",
+        "knownFor": ["Breaking news coverage", "Extensive global reporting", "Political news"],
+        "recommendedAlternatives": [
+            {"name": "Reuters", "url": "https://reuters.com", "reason": "Straight news reporting, no partisan lean"},
+            {"name": "AP News", "url": "https://apnews.com", "reason": "Non-partisan wire service"},
+            {"name": "NPR", "url": "https://npr.org", "reason": "Independent public media"},
+        ],
+    },
+    "foxnews.com": {
+        "credibilityScore": 58, "credibilityVerdict": "Mixed",
+        "editorialBias": "Right", "ownership": "Fox Corporation",
+        "funding": "Advertising, subscriptions", "transparencyScore": 65,
+        "factCheckTrackRecord": "High rate of misinformation claims",
+        "knownFor": ["Conservative commentary", "Breaking political news", "Entertainment coverage"],
+        "recommendedAlternatives": [
+            {"name": "Reuters", "url": "https://reuters.com", "reason": "Non-partisan newswire"},
+            {"name": "AP News", "url": "https://apnews.com", "reason": "Independent fact-based reporting"},
+            {"name": "The Hill", "url": "https://thehill.com", "reason": "Bipartisan political coverage"},
+        ],
+    },
+    "nytimes.com": {
+        "credibilityScore": 84, "credibilityVerdict": "Reliable",
+        "editorialBias": "Center-Left", "ownership": "New York Times Company",
+        "funding": "Subscriptions, advertising", "transparencyScore": 88,
+        "factCheckTrackRecord": "Low retraction rate, corrections promptly published",
+        "knownFor": ["Investigative journalism", "Political coverage", "International affairs"],
+        "recommendedAlternatives": [
+            {"name": "Wall Street Journal", "url": "https://wsj.com", "reason": "Business-focused, broad coverage"},
+            {"name": "Washington Post", "url": "https://washingtonpost.com", "reason": "Strong investigative team"},
+            {"name": "Reuters", "url": "https://reuters.com", "reason": "Global wire service, balanced"},
+        ],
+    },
+    "washingtonpost.com": {
+        "credibilityScore": 82, "credibilityVerdict": "Reliable",
+        "editorialBias": "Center-Left", "ownership": "Nash Holdings (Jeff Bezos)",
+        "funding": "Subscriptions, advertising", "transparencyScore": 85,
+        "factCheckTrackRecord": "Reliable, occasional corrections",
+        "knownFor": ["Watergate investigation", "National security reporting", "Political journalism"],
+        "recommendedAlternatives": [
+            {"name": "New York Times", "url": "https://nytimes.com", "reason": "Similar caliber journalism"},
+            {"name": "Wall Street Journal", "url": "https://wsj.com", "reason": "Broad national coverage"},
+            {"name": "Reuters", "url": "https://reuters.com", "reason": "Fact-focused wire service"},
+        ],
+    },
+    "reuters.com": {
+        "credibilityScore": 92, "credibilityVerdict": "Reliable",
+        "editorialBias": "Center", "ownership": "Thomson Reuters",
+        "funding": "Corporate, subscriptions", "transparencyScore": 94,
+        "factCheckTrackRecord": "Very low error rate, fast corrections",
+        "knownFor": ["Wire service journalism", "Financial markets coverage", "International news"],
+        "recommendedAlternatives": [
+            {"name": "AP News", "url": "https://apnews.com", "reason": "Another trusted wire service"},
+            {"name": "Bloomberg", "url": "https://bloomberg.com", "reason": "Financial news authority"},
+            {"name": "NPR", "url": "https://npr.org", "reason": "Non-profit public media"},
+        ],
+    },
+    "apnews.com": {
+        "credibilityScore": 93, "credibilityVerdict": "Reliable",
+        "editorialBias": "Center", "ownership": "Associated Press",
+        "funding": "News service subscriptions", "transparencyScore": 95,
+        "factCheckTrackRecord": "Extremely low error rate",
+        "knownFor": ["Wire service journalism", "Breaking news", "Sports coverage"],
+        "recommendedAlternatives": [
+            {"name": "Reuters", "url": "https://reuters.com", "reason": "Similar wire service model"},
+            {"name": "NPR", "url": "https://npr.org", "reason": "Non-profit journalism"},
+            {"name": "BBC", "url": "https://bbc.com", "reason": "International perspective"},
+        ],
+    },
+    "bbc.com": {
+        "credibilityScore": 86, "credibilityVerdict": "Reliable",
+        "editorialBias": "Center", "ownership": "BBC Trust / Public funding",
+        "funding": "License fee, commercial", "transparencyScore": 90,
+        "factCheckTrackRecord": "Low error rate, corrections noted",
+        "knownFor": ["International coverage", "BBC News journalism", "Documentaries"],
+        "recommendedAlternatives": [
+            {"name": "Reuters", "url": "https://reuters.com", "reason": "Global news wire"},
+            {"name": "The Guardian", "url": "https://theguardian.com", "reason": "UK perspective, strong journalism"},
+            {"name": "NPR", "url": "https://npr.org", "reason": "US public media"},
+        ],
+    },
+    "theguardian.com": {
+        "credibilityScore": 78, "credibilityVerdict": "Generally Reliable",
+        "editorialBias": "Left", "ownership": "Guardian Media Group",
+        "funding": "Subscriptions, advertising", "transparencyScore": 82,
+        "factCheckTrackRecord": "Generally reliable, some opinion vs news confusion",
+        "knownFor": ["UK and European coverage", "Investigative reporting", "Climate change coverage"],
+        "recommendedAlternatives": [
+            {"name": "BBC", "url": "https://bbc.com", "reason": "Balanced UK coverage"},
+            {"name": "Reuters", "url": "https://reuters.com", "reason": "Neutral wire service"},
+            {"name": "Financial Times", "url": "https://ft.com", "reason": "Business and global news"},
+        ],
+    },
+    "npr.org": {
+        "credibilityScore": 87, "credibilityVerdict": "Reliable",
+        "editorialBias": "Center-Left", "ownership": "National Public Radio",
+        "funding": "Grants, memberships, sponsors", "transparencyScore": 91,
+        "factCheckTrackRecord": "Very low error rate, corrections prominent",
+        "knownFor": ["Public radio journalism", "Cultural coverage", "Domestic news"],
+        "recommendedAlternatives": [
+            {"name": "Reuters", "url": "https://reuters.com", "reason": "Balanced wire service"},
+            {"name": "AP News", "url": "https://apnews.com", "reason": "Non-partisan newswire"},
+            {"name": "PBS", "url": "https://pbs.org", "reason": "Non-profit broadcast"},
+        ],
+    },
+    "wsj.com": {
+        "credibilityScore": 84, "credibilityVerdict": "Reliable",
+        "editorialBias": "Center-Right", "ownership": "News Corp (Rupert Murdoch)",
+        "funding": "Subscriptions, advertising", "transparencyScore": 83,
+        "factCheckTrackRecord": "Generally reliable, opinion pages separate",
+        "knownFor": ["Business journalism", "Financial markets", "Investigative reporting"],
+        "recommendedAlternatives": [
+            {"name": "New York Times", "url": "https://nytimes.com", "reason": "Broad national coverage"},
+            {"name": "Financial Times", "url": "https://ft.com", "reason": "Global business focus"},
+            {"name": "Reuters", "url": "https://reuters.com", "reason": "Financial news wire"},
+        ],
+    },
+    "nbcnews.com": {
+        "credibilityScore": 80, "credibilityVerdict": "Reliable",
+        "editorialBias": "Center-Left", "ownership": "NBCUniversal (Comcast)",
+        "funding": "Advertising, subscriptions", "transparencyScore": 79,
+        "factCheckTrackRecord": "Low retraction rate",
+        "knownFor": ["Broadcast journalism", "Political coverage", "Business news"],
+        "recommendedAlternatives": [
+            {"name": "CBS News", "url": "https://cbsnews.com", "reason": "Established broadcast news"},
+            {"name": "ABC News", "url": "https://abcnews.com", "reason": "Major broadcast network"},
+            {"name": "Reuters", "url": "https://reuters.com", "reason": "Wire service balance"},
+        ],
+    },
+    "cbsnews.com": {
+        "credibilityScore": 81, "credibilityVerdict": "Reliable",
+        "editorialBias": "Center", "ownership": "Paramount Global",
+        "funding": "Advertising, subscriptions", "transparencyScore": 80,
+        "factCheckTrackRecord": "Low error rate, corrections policy",
+        "knownFor": ["Broadcast journalism", "Political coverage", "Investigative unit"],
+        "recommendedAlternatives": [
+            {"name": "NBC News", "url": "https://nbcnews.com", "reason": "Comparable broadcast news"},
+            {"name": "ABC News", "url": "https://abcnews.com", "reason": "Major network news"},
+            {"name": "AP News", "url": "https://apnews.com", "reason": "Wire service reliability"},
+        ],
+    },
+    "breitbart.com": {
+        "credibilityScore": 22, "credibilityVerdict": "Unreliable",
+        "editorialBias": "Far Right", "ownership": "Breitbart News",
+        "funding": "Advertising", "transparencyScore": 35,
+        "factCheckTrackRecord": "High rate of false claims documented",
+        "knownFor": ["Conservative commentary", "Immigration coverage", "Political news"],
+        "recommendedAlternatives": [
+            {"name": "Reuters", "url": "https://reuters.com", "reason": "Non-partisan reporting"},
+            {"name": "AP News", "url": "https://apnews.com", "reason": "Fact-based wire service"},
+            {"name": "The Hill", "url": "https://thehill.com", "reason": "Bipartisan political coverage"},
+        ],
+    },
+    "infowars.com": {
+        "credibilityScore": 8, "credibilityVerdict": "Unreliable",
+        "editorialBias": "Far Right", "ownership": "Free Speech Systems",
+        "funding": "Product sales, donations", "transparencyScore": 12,
+        "factCheckTrackRecord": "Frequently debunked by fact-checkers",
+        "knownFor": ["Conspiracy theories", "Misinformation", "Health product sales"],
+        "recommendedAlternatives": [
+            {"name": "Reuters", "url": "https://reuters.com", "reason": "Fact-based journalism"},
+            {"name": "NPR", "url": "https://npr.org", "reason": "Non-profit public media"},
+            {"name": "AP News", "url": "https://apnews.com", "reason": "Trusted newswire"},
+        ],
+    },
+    "theonion.com": {
+        "credibilityScore": 8, "credibilityVerdict": "Satire/Parody",
+        "editorialBias": "Center", "ownership": "Global Media",
+        "funding": "Advertising", "transparencyScore": 60,
+        "factCheckTrackRecord": "Intentional satire, not factual",
+        "knownFor": ["Satirical news parody", "Humor", "Entertainment"],
+        "recommendedAlternatives": [
+            {"name": "Clickhole", "url": "https://clickhole.com", "reason": "Similar satirical format"},
+            {"name": "Reuters", "url": "https://reuters.com", "reason": "For actual news"},
+            {"name": "NPR", "url": "https://npr.org", "reason": "Real journalism"},
+        ],
+    },
+    "buzzfeed.com": {
+        "credibilityScore": 55, "credibilityVerdict": "Mixed",
+        "editorialBias": "Left", "ownership": "BuzzFeed Inc.",
+        "funding": "Advertising, partnerships", "transparencyScore": 62,
+        "factCheckTrackRecord": "Mix of news and entertainment, some retractions",
+        "knownFor": ["Listicles", "Viral content", "Investigative reporting (BuzzFeed News)"],
+        "recommendedAlternatives": [
+            {"name": "Reuters", "url": "https://reuters.com", "reason": "Fact-based news"},
+            {"name": "NPR", "url": "https://npr.org", "reason": "Public media journalism"},
+            {"name": "AP News", "url": "https://apnews.com", "reason": "Wire service reliability"},
+        ],
+    },
+    "huffpost.com": {
+        "credibilityScore": 62, "credibilityVerdict": "Mixed",
+        "editorialBias": "Left", "ownership": "BuzzFeed Inc.",
+        "funding": "Advertising", "transparencyScore": 68,
+        "factCheckTrackRecord": "Opinion-heavy, occasional fact issues",
+        "knownFor": ["Political commentary", "Breaking news", "Opinion pieces"],
+        "recommendedAlternatives": [
+            {"name": "Reuters", "url": "https://reuters.com", "reason": "Neutral reporting"},
+            {"name": "The Guardian", "url": "https://theguardian.com", "reason": "Progressive but fact-checked"},
+            {"name": "NPR", "url": "https://npr.org", "reason": "Non-profit balanced coverage"},
+        ],
+    },
+    "nypost.com": {
+        "credibilityScore": 52, "credibilityVerdict": "Mixed",
+        "editorialBias": "Right", "ownership": "News Corp",
+        "funding": "Subscriptions, advertising", "transparencyScore": 55,
+        "factCheckTrackRecord": "Some sensationalism and retractions",
+        "knownFor": ["New York crime coverage", "Tabloid journalism", "Business news"],
+        "recommendedAlternatives": [
+            {"name": "New York Times", "url": "https://nytimes.com", "reason": "In-depth NYC coverage"},
+            {"name": "Reuters", "url": "https://reuters.com", "reason": "Balanced news"},
+            {"name": "Wall Street Journal", "url": "https://wsj.com", "reason": "Business journalism"},
+        ],
+    },
+    "dailymail.co.uk": {
+        "credibilityScore": 42, "credibilityVerdict": "Mixed",
+        "editorialBias": "Right", "ownership": "DMGT (Lord Rothermere)",
+        "funding": "Advertising", "transparencyScore": 40,
+        "factCheckTrackRecord": "Known for sensationalism and errors",
+        "knownFor": ["British celebrity news", "Scandal coverage", "UK news"],
+        "recommendedAlternatives": [
+            {"name": "BBC", "url": "https://bbc.com", "reason": "Trusted UK coverage"},
+            {"name": "The Guardian", "url": "https://theguardian.com", "reason": "Quality British press"},
+            {"name": "Reuters", "url": "https://reuters.com", "reason": "Wire service neutrality"},
+        ],
+    },
+    "theepochtimes.com": {
+        "credibilityScore": 25, "credibilityVerdict": "Unreliable",
+        "editorialBias": "Far Right", "ownership": "Epoch Media Group",
+        "funding": "Subscriptions, donations", "transparencyScore": 30,
+        "factCheckTrackRecord": "Multiple fact-checks and corrections",
+        "knownFor": ["Anti-China coverage", "Conservative commentary", " election claims"],
+        "recommendedAlternatives": [
+            {"name": "Reuters", "url": "https://reuters.com", "reason": "Balanced international coverage"},
+            {"name": "AP News", "url": "https://apnews.com", "reason": "Fact-based reporting"},
+            {"name": "BBC", "url": "https://bbc.com", "reason": "Global perspective"},
+        ],
+    },
+    "naturalnews.com": {
+        "credibilityScore": 10, "credibilityVerdict": "Unreliable",
+        "editorialBias": "Far Right", "ownership": "Mike Adams (self-published)",
+        "funding": "Product sales, ads", "transparencyScore": 8,
+        "factCheckTrackRecord": "Consistently flagged for misinformation",
+        "knownFor": ["Anti-vaccine content", "Health misinformation", "Conspiracy theories"],
+        "recommendedAlternatives": [
+            {"name": "Reuters", "url": "https://reuters.com", "reason": "Fact-based health coverage"},
+            {"name": "NPR", "url": "https://npr.org", "reason": "Science-based reporting"},
+            {"name": "AP News", "url": "https://apnews.com", "reason": "Reliable news service"},
+        ],
+    },
+    "thefederalist.com": {
+        "credibilityScore": 48, "credibilityVerdict": "Mixed",
+        "editorialBias": "Right", "ownership": "The Federalist (Lachlan Markay)",
+        "funding": "Donations, advertising", "transparencyScore": 45,
+        "factCheckTrackRecord": "Opinion site, some disputed claims",
+        "knownFor": ["Conservative commentary", "Political opinion", "Cultural criticism"],
+        "recommendedAlternatives": [
+            {"name": "The Hill", "url": "https://thehill.com", "reason": "Bipartisan political news"},
+            {"name": "Reuters", "url": "https://reuters.com", "reason": "Neutral news reporting"},
+            {"name": "Wall Street Journal", "url": "https://wsj.com", "reason": "Business and politics"},
+        ],
+    },
+    "motherjones.com": {
+        "credibilityScore": 70, "credibilityVerdict": "Generally Reliable",
+        "editorialBias": "Left", "ownership": "Mother Jones Foundation",
+        "funding": "Non-profit, subscriptions", "transparencyScore": 78,
+        "factCheckTrackRecord": "Reliable, investigative focus",
+        "knownFor": ["Investigative journalism", "Environmental coverage", "Political reporting"],
+        "recommendedAlternatives": [
+            {"name": "The Guardian", "url": "https://theguardian.com", "reason": "Progressive investigative"},
+            {"name": "NPR", "url": "https://npr.org", "reason": "Non-profit balanced"},
+            {"name": "ProPublica", "url": "https://propublica.org", "reason": "Non-profit investigative"},
+        ],
+    },
+    "reason.com": {
+        "credibilityScore": 74, "credibilityVerdict": "Generally Reliable",
+        "editorialBias": "Center", "ownership": "Reason Foundation",
+        "funding": "Subscriptions, donations", "transparencyScore": 80,
+        "factCheckTrackRecord": "Libertarian perspective, fact-checked reporting",
+        "knownFor": ["Libertarian commentary", "Criminal justice reform", "Economic policy"],
+        "recommendedAlternatives": [
+            {"name": "Reuters", "url": "https://reuters.com", "reason": "Neutral newswire"},
+            {"name": "The Hill", "url": "https://thehill.com", "reason": "Bipartisan coverage"},
+            {"name": "NPR", "url": "https://npr.org", "reason": "Public media"},
+        ],
+    },
+    "bipartisanpolicy.org": {
+        "credibilityScore": 82, "credibilityVerdict": "Reliable",
+        "editorialBias": "Center", "ownership": "Bipartisan Policy Center",
+        "funding": "Grants, foundations", "transparencyScore": 90,
+        "factCheckTrackRecord": "Policy-focused, fact-based analysis",
+        "knownFor": ["Congressional coverage", "Policy analysis", "Bipartisan reporting"],
+        "recommendedAlternatives": [
+            {"name": "Reuters", "url": "https://reuters.com", "reason": "Straight reporting"},
+            {"name": "Pew Research", "url": "https://pewresearch.org", "reason": "Nonpartisan polling"},
+            {"name": "Brookings Institution", "url": "https://brookings.edu", "reason": "Policy research"},
+        ],
+    },
+    "snopes.com": {
+        "credibilityScore": 88, "credibilityVerdict": "Reliable",
+        "editorialBias": "Center", "ownership": "Snopes Media Group",
+        "funding": "Advertising, subscriptions", "transparencyScore": 92,
+        "factCheckTrackRecord": "Established fact-checker, low error rate",
+        "knownFor": ["Fact-checking viral claims", "Misinformation debunking", "Urban legend research"],
+        "recommendedAlternatives": [
+            {"name": "PolitiFact", "url": "https://politifact.com", "reason": "Established fact-checker"},
+            {"name": "FactCheck.org", "url": "https://factcheck.org", "reason": "Nonpartisan fact-checking"},
+            {"name": "Reuters", "url": "https://reuters.com", "reason": "Breaking news verification"},
+        ],
+    },
+    "politifact.com": {
+        "credibilityScore": 90, "credibilityVerdict": "Reliable",
+        "editorialBias": "Center", "ownership": "Poynter Institute",
+        "funding": "Non-profit, grants", "transparencyScore": 93,
+        "factCheckTrackRecord": "Gold standard political fact-checking",
+        "knownFor": ["Political claim verification", "Truth-O-Meter", "PolitiFact ratings"],
+        "recommendedAlternatives": [
+            {"name": "Snopes", "url": "https://snopes.com", "reason": "Long-running fact-checker"},
+            {"name": "FactCheck.org", "url": "https://factcheck.org", "reason": "Nonpartisan monitoring"},
+            {"name": "AP News", "url": "https://apnews.com", "reason": "Fact-based wire service"},
+        ],
+    },
+    "factcheck.org": {
+        "credibilityScore": 89, "credibilityVerdict": "Reliable",
+        "editorialBias": "Center", "ownership": "Annenberg Public Policy Center",
+        "funding": "Grants, educational", "transparencyScore": 91,
+        "factCheckTrackRecord": "Established nonpartisan fact-checker",
+        "knownFor": ["Political fact-checking", "Viral claim verification", "Policy analysis"],
+        "recommendedAlternatives": [
+            {"name": "PolitiFact", "url": "https://politifact.com", "reason": "Political fact-checks"},
+            {"name": "Snopes", "url": "https://snopes.com", "reason": "Viral misinformation"},
+            {"name": "Reuters", "url": "https://reuters.com", "reason": "News verification"},
+        ],
+    },
+}
+
+
+def get_site_credibility(domain: str) -> dict:
+    """Look up a domain in the credibility database or return a low-confidence default."""
+    if not domain:
+        return _make_unknown_site_response(domain, "No domain provided")
+
+    # Clean domain
+    clean = domain.lower().strip()
+    if clean.startswith("www."):
+        clean = clean[4:]
+
+    # Try exact match first
+    if clean in SITE_CREDIBILITY_DB:
+        data = SITE_CREDIBILITY_DB[clean]
+        return {
+            "domain": clean,
+            **data,
+        }
+
+    # Try suffix matching for subdomains
+    parts = clean.split(".")
+    if len(parts) >= 2:
+        base = ".".join(parts[-2:])
+        if base in SITE_CREDIBILITY_DB:
+            data = SITE_CREDIBILITY_DB[base]
+            return {
+                "domain": clean,
+                **data,
+            }
+
+    # Unknown site - return low-confidence default
+    return _make_unknown_site_response(clean)
+
+
+def _make_unknown_site_response(domain: str, reason: str) -> dict:
+    return {
+        "domain": domain,
+        "credibilityScore": 50,
+        "credibilityVerdict": "Mixed",
+        "editorialBias": "Unknown",
+        "ownership": "Unknown",
+        "funding": "Unknown",
+        "transparencyScore": 30,
+        "factCheckTrackRecord": f"Not a recognized major news outlet: {reason}",
+        "knownFor": ["Unknown publisher", "Not a known news organization"],
+        "recommendedAlternatives": [
+            {"name": "Reuters", "url": "https://reuters.com", "reason": "Trusted global newswire"},
+            {"name": "AP News", "url": "https://apnews.com", "reason": "Reliable fact-based reporting"},
+            {"name": "NPR", "url": "https://npr.org", "reason": "Non-profit public media"},
+        ],
+    }
+
+
+# ============================================
+# NEW ENDPOINTS
+# ============================================
+
+class SiteCredibilityRequest(BaseModel):
+    domain: str
+
+
+class SiteCredibilityResponse(BaseModel):
+    domain: str
+    credibilityScore: int
+    credibilityVerdict: str
+    editorialBias: str
+    ownership: str
+    funding: str
+    transparencyScore: int
+    factCheckTrackRecord: str
+    knownFor: List[str]
+    recommendedAlternatives: List[dict]
+
+
+@app.post("/site-credibility", response_model=SiteCredibilityResponse)
+async def site_credibility_endpoint(request: SiteCredibilityRequest):
+    """Assess the credibility of a news website/domain using media bias research."""
+    result = get_site_credibility(request.domain)
+    return result
+
+
+@app.post("/api/detect-claims")
+async def detect_claims(request: dict):
+    """Detect verifiable claims in a block of text."""
+    text = request.get("text", "")
+
+    if not text or len(text.strip()) < 50:
+        return {"success": True, "data": {"claims": [], "message": "Text too short"}}
+
+    # Simple claim extraction - split by sentences and filter for claim-like statements
+    import re
+    sentences = re.split(r'[.!?]+', text)
+    claims = []
+
+    for sent in sentences:
+        sent = sent.strip()
+        if len(sent) < 30:
+            continue
+        if len(sent) > 300:
+            continue
+
+        # Filter out questions, commands, and statement phrases
+        if sent.startswith("?") or sent.startswith("!"):
+            continue
+        if any(sent.lower().startswith(x) for x in ["click here", "sign up", "subscribe", "follow us", "visit", "call"]):
+            continue
+
+        # Look for claim-like indicators: numbers, statistics, specific claims
+        has_indicator = any(x in sent.lower() for x in [
+            " percent", "%", " study", " research", " according to", " experts",
+            " found ", " discovered", " announced", " reported", " confirmed",
+            " believe ", " claim ", " says ", " according to the ",
+        ])
+
+        if has_indicator or len(sent) < 150:
+            claims.append({"claim": sent.strip()})
+
+    # Deduplicate
+    seen = set()
+    unique_claims = []
+    for c in claims:
+        norm = c["claim"].lower()[:50]
+        if norm not in seen:
+            seen.add(norm)
+            unique_claims.append(c)
+
+    return {"success": True, "data": {"claims": unique_claims[:10]}}
+
+
+@app.post("/api/counter-narrative")
+async def counter_narrative(request: dict):
+    """Generate a counter-narrative for a false or misleading claim."""
+    claim = request.get("claim", "")
+    verdict = request.get("verdict", "")
+    explanation = request.get("explanation", "")
+
+    narratives = {
+        "false": f"The claim that {claim[:100]} has been debunked by reliable sources. {explanation[:200]}",
+        "misleading": f"While containing elements of truth, the claim about {claim[:80]} requires important context. {explanation[:200]} Consider checking multiple authoritative sources for the full picture.",
+    }
+
+    narrative = narratives.get(verdict, "This claim should be verified with multiple reliable sources before sharing.")
+
+    return {
+        "success": True,
+        "data": {
+            "counter_narrative": narrative,
+            "original_claim": claim,
+            "verdict": verdict,
+        }
+    }
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
