@@ -124,7 +124,24 @@ async function apiCall<T>(endpoint: string, options?: RequestInit): Promise<T> {
     });
 
     if (!response.ok) {
-      throw new Error(`API call failed: ${response.status} ${response.statusText}`);
+      let errorMessage = `API call failed: ${response.status} ${response.statusText}`;
+
+      try {
+        const errorBody = await response.json();
+
+        if (typeof errorBody?.detail === "string") {
+          errorMessage = errorBody.detail;
+        } else if (Array.isArray(errorBody?.detail) && errorBody.detail.length > 0) {
+          const firstIssue = errorBody.detail[0];
+          if (typeof firstIssue?.msg === "string") {
+            errorMessage = firstIssue.msg;
+          }
+        }
+      } catch {
+        // Fall back to the HTTP status message when the response body is not JSON.
+      }
+
+      throw new Error(errorMessage);
     }
 
     return await response.json();

@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/components/AuthContext";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
 export default function LoginPage() {
   const router = useRouter();
   const { login } = useAuth();
@@ -22,28 +24,37 @@ export default function LoginPage() {
 
     const data = { username: username.trim(), password };
 
-    const response = await fetch("http://localhost:8000/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
 
-    if (!response.ok) {
-      const body = await response.json().catch(() => null);
-      setMessage(body?.detail || "Invalid username or password.");
-      return;
+      if (!response.ok) {
+        const body = await response.json().catch(() => null);
+        if (response.status === 404) {
+          setMessage("Auth service was not found. Restart the backend and try again.");
+          return;
+        }
+
+        setMessage(body?.detail || "Invalid username or password.");
+        return;
+      }
+
+      login(username.trim(), password);
+      router.push("/");
+    } catch {
+      setMessage("Could not reach the backend. Make sure the API server is running.");
     }
-
-    login(username.trim(), password);
-    router.push("/#demo");
   };
 
   return (
-    <main className="min-h-screen bg-[#0c0915] text-white flex items-center justify-center py-16 px-4 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-950/70 p-8 shadow-xl">
+    <main className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(120,74,255,0.16)_0%,_rgba(120,74,255,0.08)_16%,_rgba(18,18,24,0.92)_42%,_#0b0b0f_72%),linear-gradient(180deg,_#13131a_0%,_#0f1015_28%,_#0c0c11_55%,_#09090c_100%)] px-4 py-16 text-white sm:px-6 lg:px-8">
+      <div className="w-full max-w-md rounded-2xl border border-violet-900/30 bg-zinc-950/72 p-8 shadow-xl shadow-violet-950/30 backdrop-blur-md">
         <h1 className="text-2xl font-bold mb-4">Login</h1>
         <p className="mb-5 text-sm text-zinc-300">
-          This is currently a frontend-only login gate. It does not create a real backend account yet, and login state is not saved to browser storage anymore.
+          Sign in with your backend account to open the checker and extension download flow.
         </p>
         <form onSubmit={handleSubmit} className="space-y-4">
           <label className="block text-sm">
@@ -51,7 +62,7 @@ export default function LoginPage() {
             <input
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
               placeholder="Enter username"
               autoComplete="username"
             />
@@ -63,7 +74,7 @@ export default function LoginPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
               placeholder="Enter password"
               autoComplete="current-password"
             />
@@ -75,17 +86,17 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            className="w-full rounded-lg bg-blue-600 py-2 font-medium text-white hover:bg-blue-700"
+            className="w-full rounded-lg bg-violet-600 py-2 font-medium text-white hover:bg-violet-500"
           >
             Login
           </button>
         </form>
 
         <p className="mt-4 text-sm text-zinc-400">
-          New here? <Link href="/register" className="text-blue-400 hover:underline">Create an account</Link>
+          New here? <Link href="/register" className="text-violet-300 hover:underline">Create an account</Link>
         </p>
         <p className="mt-4 text-sm">
-          <Link href="/" className="text-blue-400 hover:underline">
+          <Link href="/" className="text-violet-300 hover:underline">
             Back to home
           </Link>
         </p>

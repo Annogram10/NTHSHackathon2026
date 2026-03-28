@@ -68,9 +68,12 @@ export function DemoSection({ checkerOnly = false }: { checkerOnly?: boolean }) 
     } catch (error) {
       console.error("Analysis failed:", error);
       setResult(null);
-      setError(
-        "We could not complete the fact check right now. Make sure the backend is running so trusted source APIs can be queried."
-      );
+      const message =
+        error instanceof Error && error.message
+          ? error.message
+          : "We could not complete the fact check right now. Make sure the backend is running so trusted source APIs can be queried.";
+
+      setError(message);
     } finally {
       setIsLoading(false);
       setTimeout(() => setIsTransitioning(false), 300);

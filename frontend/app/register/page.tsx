@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/components/AuthContext";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
 export default function RegisterPage() {
   const router = useRouter();
   const { login } = useAuth();
@@ -26,28 +28,37 @@ export default function RegisterPage() {
       return;
     }
 
-    const response = await fetch("http://localhost:8000/api/auth/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username: username.trim(), password }),
-    });
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: username.trim(), password }),
+      });
 
-    if (!response.ok) {
-      const body = await response.json().catch(() => null);
-      setMessage(body?.detail || "Unable to register. Try a different username.");
-      return;
+      if (!response.ok) {
+        const body = await response.json().catch(() => null);
+        if (response.status === 404) {
+          setMessage("Auth service was not found. Restart the backend and try again.");
+          return;
+        }
+
+        setMessage(body?.detail || "Unable to register. Try a different username.");
+        return;
+      }
+
+      login(username.trim(), password);
+      router.push("/");
+    } catch {
+      setMessage("Could not reach the backend. Make sure the API server is running.");
     }
-
-    login(username.trim(), password);
-    router.push("/#demo");
   };
 
   return (
-    <main className="min-h-screen bg-[#0c0915] text-white flex items-center justify-center py-16 px-4 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-950/70 p-8 shadow-xl">
+    <main className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(120,74,255,0.16)_0%,_rgba(120,74,255,0.08)_16%,_rgba(18,18,24,0.92)_42%,_#0b0b0f_72%),linear-gradient(180deg,_#13131a_0%,_#0f1015_28%,_#0c0c11_55%,_#09090c_100%)] px-4 py-16 text-white sm:px-6 lg:px-8">
+      <div className="w-full max-w-md rounded-2xl border border-violet-900/30 bg-zinc-950/72 p-8 shadow-xl shadow-violet-950/30 backdrop-blur-md">
         <h1 className="text-2xl font-bold mb-4">Create Account</h1>
         <p className="mb-5 text-sm text-zinc-300">
-          Register to unlock unlimited demo uses and target download button access.
+          Create a backend account to unlock the checker and extension download access.
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -56,7 +67,7 @@ export default function RegisterPage() {
             <input
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
               placeholder="Choose a username"
               autoComplete="username"
             />
@@ -68,7 +79,7 @@ export default function RegisterPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
               placeholder="Create a password"
               autoComplete="new-password"
             />
@@ -80,7 +91,7 @@ export default function RegisterPage() {
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
               placeholder="Confirm your password"
               autoComplete="new-password"
             />
@@ -90,17 +101,17 @@ export default function RegisterPage() {
 
           <button
             type="submit"
-            className="w-full rounded-lg bg-green-600 py-2 font-medium text-white hover:bg-green-700"
+            className="w-full rounded-lg bg-violet-600 py-2 font-medium text-white hover:bg-violet-500"
           >
             Sign Up
           </button>
         </form>
 
         <p className="mt-4 text-sm text-zinc-400">
-          Already have an account? <Link href="/login" className="text-blue-400 hover:underline">Login</Link>
+          Already have an account? <Link href="/login" className="text-violet-300 hover:underline">Login</Link>
         </p>
         <p className="mt-4 text-sm">
-          <Link href="/" className="text-blue-400 hover:underline">
+          <Link href="/" className="text-violet-300 hover:underline">
             Back to home
           </Link>
         </p>

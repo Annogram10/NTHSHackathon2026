@@ -12,11 +12,11 @@ export interface ButtonProps
 }
 
 const baseStyles =
-  "inline-flex items-center justify-center whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 disabled:pointer-events-none disabled:opacity-50";
+  "inline-flex items-center justify-center whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500/50 disabled:pointer-events-none disabled:opacity-50";
 
 const variantStyles: Record<ButtonVariant, string> = {
   default:
-    "bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-500/20",
+    "bg-violet-600 text-white hover:bg-violet-500 shadow-lg shadow-violet-700/20",
   outline:
     "border border-zinc-200 bg-white/80 text-zinc-900 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900/70 dark:text-zinc-100 dark:hover:bg-zinc-800",
 };

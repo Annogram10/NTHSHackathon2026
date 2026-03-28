@@ -9,14 +9,14 @@ export default function HomePageClient() {
   const { isLoggedIn, username, logout } = useAuth();
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(180deg,_#1d0d33_0%,_#150a27_14%,_#10081d_28%,_#0c0915_48%,_#09090c_72%,_#09090c_100%)] text-zinc-100">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(120,74,255,0.16)_0%,_rgba(120,74,255,0.08)_16%,_rgba(18,18,24,0.92)_42%,_#0b0b0f_72%),linear-gradient(180deg,_#13131a_0%,_#0f1015_28%,_#0c0c11_55%,_#09090c_100%)] text-zinc-100">
       <header className="relative">
         <nav className="fixed top-0 left-0 right-0 z-50 border-b border-zinc-800/80 bg-[#09090c]/65 backdrop-blur-xl">
           <div className="max-w-6xl mx-auto px-4 sm:px-6">
             <div className="flex items-center justify-between h-16">
               <div className="flex items-center gap-2">
                 <div className="relative w-8 h-8">
-                  <div className="absolute inset-0 bg-blue-600 rounded-full" />
+                  <div className="absolute inset-0 rounded-full bg-violet-600" />
                   <div className="absolute inset-0.5 bg-white rounded-full opacity-90" />
                 </div>
                 <span className="text-lg font-bold text-zinc-100">Facticity</span>
@@ -49,7 +49,7 @@ export default function HomePageClient() {
                     <button
                       type="button"
                       onClick={logout}
-                      className="px-4 py-2 text-sm font-medium bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all"
+                      className="rounded-lg bg-violet-600 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-violet-500"
                     >
                       Logout
                     </button>
@@ -58,27 +58,19 @@ export default function HomePageClient() {
                   <>
                     <Link
                       href="/login"
-                      className="px-4 py-2 text-sm font-medium bg-transparent border border-zinc-700 hover:border-zinc-500 rounded-lg transition-colors"
+                      className="rounded-lg border border-violet-500/40 bg-violet-500/10 px-4 py-2 text-sm font-medium text-violet-100 transition-colors hover:border-violet-400/60 hover:bg-violet-500/20"
                     >
                       Login
                     </Link>
                     <Link
                       href="/register"
-                      className="px-4 py-2 text-sm font-medium bg-[#16a34a] hover:bg-[#0ea44c] text-white rounded-lg shadow-lg shadow-[#16a34a]/30 transition-all"
+                      className="rounded-lg bg-violet-600 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-violet-700/30 transition-all hover:bg-violet-500"
                     >
                       Sign Up
                     </Link>
                   </>
                 )}
-                {!isLoggedIn && (
-                  <a
-                    href="#demo"
-                    className="px-4 py-2 text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-                  >
-                    Try Demo
-                  </a>
-                )}
-              </div>
+          </div>
             </div>
           </div>
         </nav>
@@ -104,7 +96,7 @@ export default function HomePageClient() {
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-2">
                 <div className="relative w-6 h-6">
-                  <div className="absolute inset-0 bg-blue-600 rounded-full" />
+                  <div className="absolute inset-0 rounded-full bg-violet-600" />
                   <div className="absolute inset-0.5 bg-white rounded-full opacity-90" />
                 </div>
                 <span className="text-sm font-bold text-zinc-100">Facticity</span>

@@ -2,8 +2,8 @@ import Link from "next/link";
 
 export default function DownloadPage() {
   return (
-    <main className="min-h-screen bg-[#0c0915] text-white flex items-center justify-center py-16 px-4 sm:px-6 lg:px-8">
-      <div className="w-full max-w-2xl rounded-2xl border border-zinc-800 bg-zinc-950/70 p-8 shadow-xl">
+    <main className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(120,74,255,0.16)_0%,_rgba(120,74,255,0.08)_16%,_rgba(18,18,24,0.92)_42%,_#0b0b0f_72%),linear-gradient(180deg,_#13131a_0%,_#0f1015_28%,_#0c0c11_55%,_#09090c_100%)] px-4 py-16 text-white sm:px-6 lg:px-8">
+      <div className="w-full max-w-2xl rounded-2xl border border-violet-900/30 bg-zinc-950/72 p-8 shadow-xl shadow-violet-950/30 backdrop-blur-md">
         <h1 className="text-3xl font-bold mb-4">Install the Facticity Chrome Extension</h1>
         <p className="text-zinc-300 mb-6">
           Thanks for logging in. The extension now connects to the full
@@ -23,7 +23,7 @@ export default function DownloadPage() {
           <a
             href="/facticity-chrome-extension.zip"
             download
-            className="block rounded-lg border border-zinc-700 bg-blue-600 px-4 py-3 text-center font-medium text-white hover:bg-blue-700"
+            className="block rounded-lg border border-violet-500/40 bg-violet-600 px-4 py-3 text-center font-medium text-white hover:bg-violet-500"
           >
             Download Chrome Extension
           </a>
@@ -47,7 +47,7 @@ export default function DownloadPage() {
         </div>
 
         <p className="mt-6 text-sm text-zinc-400">
-          <Link href="/" className="text-blue-400 hover:underline">
+          <Link href="/" className="text-violet-300 hover:underline">
             Back to home
           </Link>
         </p>
