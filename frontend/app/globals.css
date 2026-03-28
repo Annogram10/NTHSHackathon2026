@@ -3,11 +3,23 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --muted: #f5f7fb;
+  --border: #d9e1ec;
+  --primary: #2563eb;
+  --primary-foreground: #eff6ff;
+  --secondary: #0f766e;
+  --accent: #60a5fa;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
   --font-sans: "Avenir Next", "Segoe UI", sans-serif;
   --font-mono: "SFMono-Regular", "SF Mono", "Menlo", monospace;
 }
@@ -16,6 +28,12 @@
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+    --muted: #111827;
+    --border: #27272a;
+    --primary: #60a5fa;
+    --primary-foreground: #0b1220;
+    --secondary: #2dd4bf;
+    --accent: #93c5fd;
   }
 }
 
