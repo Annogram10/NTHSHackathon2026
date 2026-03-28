@@ -13,6 +13,7 @@ import { API_BASE_URL, API_TIMEOUT } from './config.js';
 let currentTab = 'paste';
 let currentAnalysisResult = null;
 let currentDomain = null;
+let currentPageUrl = null;
 let vouchScore = 0;
 let analysisCount = 0;
 let cachedSiteData = null;
@@ -134,11 +135,20 @@ async function handleAnalyze() {
     return;
   }
 
+  const pageContext = await getActivePageContext();
+  currentDomain = pageContext.domain;
+  currentPageUrl = pageContext.url;
+
   showPasteLoading();
   clearPasteResult();
 
   try {
-    const result = await callAPI('/api/analyze', { claim });
+    const payload = { claim };
+    if (currentPageUrl) {
+      payload.source_url = currentPageUrl;
+    }
+
+    const result = await callAPI('/api/analyze', payload);
     currentAnalysisResult = result.data;
 
     // Save to history
@@ -354,6 +364,7 @@ async function handleScanPage() {
     // Get current tab
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     currentDomain = extractDomain(tab.url);
+    currentPageUrl = isHttpUrl(tab.url) ? tab.url : null;
     els.scanDomain.textContent = currentDomain || tab.url;
 
     // Extract page content
@@ -430,12 +441,12 @@ function displayDetectedClaims(claims) {
       card.classList.add('selected');
 
       const claimText = card.dataset.claim;
-      handleAnalyzeClaim(claimText);
+      handleAnalyzeClaim(claimText, currentPageUrl);
     });
   });
 }
 
-async function handleAnalyzeClaim(claimText) {
+async function handleAnalyzeClaim(claimText, sourceUrl = null) {
   els.claimResultSection.style.display = 'flex';
   els.claimResultSection.innerHTML = `
     <div class="loading-section" style="padding:24px 0;">
@@ -445,7 +456,12 @@ async function handleAnalyzeClaim(claimText) {
   `;
 
   try {
-    const result = await callAPI('/api/analyze', { claim: claimText });
+    const payload = { claim: claimText };
+    if (sourceUrl) {
+      payload.source_url = sourceUrl;
+    }
+
+    const result = await callAPI('/api/analyze', payload);
     displayClaimResult(result.data);
   } catch (err) {
     els.claimResultSection.innerHTML = `
@@ -496,6 +512,7 @@ async function handleSiteCredibility() {
     const domain = extractDomain(tab.url) || 'unknown';
 
     currentDomain = domain;
+    currentPageUrl = isHttpUrl(tab.url) ? tab.url : null;
     els.siteDomainLabel.textContent = domain;
     els.siteFavicon.src = `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
 
@@ -743,6 +760,24 @@ async function callAPI(endpoint, body) {
     }
     throw err;
   }
+}
+
+async function getActivePageContext() {
+  try {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    const url = isHttpUrl(tab?.url) ? tab.url : null;
+    return {
+      url,
+      domain: extractDomain(tab?.url),
+      title: tab?.title || '',
+    };
+  } catch (_err) {
+    return { url: null, domain: null, title: '' };
+  }
+}
+
+function isHttpUrl(url) {
+  return typeof url === 'string' && (url.startsWith('http://') || url.startsWith('https://'));
 }
 
 // ============================================
