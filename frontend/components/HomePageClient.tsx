@@ -6,7 +6,7 @@ import { DemoSection, HowItWorksSection, FeatureSection, UseCasesSection } from 
 import { GlowyWavesHero } from "@/components/ui/glowy-waves-hero-shadcnui";
 
 export default function HomePageClient() {
-  const { isLoggedIn, username } = useAuth();
+  const { isLoggedIn, username, logout } = useAuth();
 
   return (
     <div className="min-h-screen bg-[linear-gradient(180deg,_#1d0d33_0%,_#150a27_14%,_#10081d_28%,_#0c0915_48%,_#09090c_72%,_#09090c_100%)] text-zinc-100">
@@ -34,23 +34,34 @@ export default function HomePageClient() {
               </div>
               <div className="flex items-center gap-2">
                 {isLoggedIn ? (
-                  <span className="px-4 py-2 text-sm font-medium text-green-300 rounded-lg bg-green-950/20">
-                    Logged in as {username}
-                  </span>
+                  <>
+                    <span className="px-4 py-2 text-sm font-medium text-green-300 rounded-lg bg-green-950/20">
+                      Logged in as {username}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={logout}
+                      className="px-4 py-2 text-sm font-medium bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all"
+                    >
+                      Logout
+                    </button>
+                  </>
                 ) : (
-                  <Link
-                    href="/login"
-                    className="px-4 py-2 text-sm font-medium bg-transparent border border-zinc-700 hover:border-zinc-500 rounded-lg transition-colors"
-                  >
-                    Login
-                  </Link>
+                  <>
+                    <Link
+                      href="/login"
+                      className="px-4 py-2 text-sm font-medium bg-transparent border border-zinc-700 hover:border-zinc-500 rounded-lg transition-colors"
+                    >
+                      Login
+                    </Link>
+                    <Link
+                      href="/register"
+                      className="px-4 py-2 text-sm font-medium bg-[#16a34a] hover:bg-[#0ea44c] text-white rounded-lg shadow-lg shadow-[#16a34a]/30 transition-all"
+                    >
+                      Sign Up
+                    </Link>
+                  </>
                 )}
-                <a
-                  href="#demo"
-                  className="px-4 py-2 text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-                >
-                  Try Demo
-                </a>
               </div>
             </div>
           </div>

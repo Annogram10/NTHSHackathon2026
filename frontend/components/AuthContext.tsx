@@ -1,15 +1,8 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState, useCallback } from "react";
+import { createContext, useContext, useMemo, useState, useCallback } from "react";
 
-const AUTH_STORAGE_KEY = "facticity_auth";
 export const MAX_FREE_DEMO_USES = 3;
-
-type AuthState = {
-  isLoggedIn: boolean;
-  username: string | null;
-  demoUses: number;
-};
 
 type AuthContextType = {
   isLoggedIn: boolean;
@@ -33,48 +26,11 @@ const AuthContext = createContext<AuthContextType>({
   resetDemoUsage: () => {},
 });
 
-function loadAuthState(): AuthState {
-  if (typeof window === "undefined") {
-    return { isLoggedIn: false, username: null, demoUses: 0 };
-  }
-
-  try {
-    const saved = window.localStorage.getItem(AUTH_STORAGE_KEY);
-    if (!saved) {
-      return { isLoggedIn: false, username: null, demoUses: 0 };
-    }
-    const parsed = JSON.parse(saved);
-    return {
-      isLoggedIn: parsed.isLoggedIn === true,
-      username: parsed.username || null,
-      demoUses: typeof parsed.demoUses === "number" ? parsed.demoUses : 0,
-    };
-  } catch {
-    return { isLoggedIn: false, username: null, demoUses: 0 };
-  }
-}
-
-function saveAuthState(state: AuthState) {
-  if (typeof window === "undefined") {
-    return;
-  }
-  window.localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(state));
-}
-
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => {
-    return loadAuthState().isLoggedIn;
-  });
-  const [username, setUsername] = useState<string | null>(() => {
-    return loadAuthState().username;
-  });
-  const [demoUses, setDemoUses] = useState<number>(() => {
-    return loadAuthState().demoUses;
-  });
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [username, setUsername] = useState<string | null>(null);
+  const [demoUses, setDemoUses] = useState<number>(0);
 
-  useEffect(() => {
-    saveAuthState({ isLoggedIn, username, demoUses });
-  }, [isLoggedIn, username, demoUses]);
 
   const canUseDemo = isLoggedIn || demoUses < MAX_FREE_DEMO_USES;
 
@@ -93,9 +49,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoggedIn(false);
     setUsername(null);
     setDemoUses(0);
-    if (typeof window !== "undefined") {
-      window.localStorage.removeItem(AUTH_STORAGE_KEY);
-    }
   }, []);
 
   const incrementDemoUsage = useCallback(() => {

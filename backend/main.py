@@ -4,7 +4,11 @@ FastAPI-based fact-checking service with benchmark sources and
 basic website/domain credibility signals.
 """
 
+import hashlib
+import json
+import os
 import re
+import sqlite3
 import uuid
 from datetime import datetime, timezone
 from enum import Enum
@@ -92,8 +96,52 @@ class HistoryItem(BaseModel):
     timestamp: datetime
 
 
-# In-memory storage
-_history: List[AnalysisResult] = []
+class AuthRequest(BaseModel):
+    username: str
+    password: str
+
+
+class AuthResponse(BaseModel):
+    success: bool
+    message: str
+
+
+# SQLite-backed persistent history storage
+DB_PATH = os.path.join(os.path.dirname(__file__), "data.db")
+
+conn = sqlite3.connect(DB_PATH, check_same_thread=False, detect_types=sqlite3.PARSE_DECLTYPES)
+conn.row_factory = sqlite3.Row
+
+def initialize_db():
+    with conn:
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS history (
+                id TEXT PRIMARY KEY,
+                claim TEXT NOT NULL,
+                verdict TEXT NOT NULL,
+                trust_score INTEGER NOT NULL,
+                confidence INTEGER NOT NULL,
+                explanation TEXT NOT NULL,
+                why_misleading TEXT,
+                bias_analysis TEXT,
+                core_claim TEXT NOT NULL,
+                sources TEXT NOT NULL,
+                timestamp TEXT NOT NULL
+            )
+            """
+        )
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS users (
+                username TEXT PRIMARY KEY,
+                password_hash TEXT NOT NULL,
+                created_at TEXT NOT NULL
+            )
+            """
+        )
+
+initialize_db()
 
 HIGH_CREDIBILITY_DOMAINS = {
     "apnews.com": 88,
@@ -123,6 +171,96 @@ SATIRE_DOMAINS = {
     "thebeaverton.com": "Known satire site",
     "theonion.com": "Known satire site",
 }
+
+
+def hash_password(password: str) -> str:
+    return hashlib.sha256(password.encode("utf-8")).hexdigest()
+
+
+def get_user(username: str):
+    row = conn.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone()
+    return row
+
+
+def create_user(username: str, password: str):
+    if get_user(username):
+        raise ValueError("Username already exists")
+
+    password_hash = hash_password(password)
+    with conn:
+        conn.execute(
+            "INSERT INTO users (username, password_hash, created_at) VALUES (?, ?, ?)",
+            (username, password_hash, datetime.now(timezone.utc).isoformat()),
+        )
+
+
+def dict_to_analysis_result(row: sqlite3.Row) -> AnalysisResult:
+    sources = json.loads(row["sources"])
+    source_objs = [Source(**source) for source in sources]
+    return AnalysisResult(
+        id=row["id"],
+        claim=row["claim"],
+        verdict=Verdict(row["verdict"]),
+        trust_score=row["trust_score"],
+        confidence=row["confidence"],
+        explanation=row["explanation"],
+        why_misleading=row["why_misleading"],
+        bias_analysis=row["bias_analysis"],
+        core_claim=row["core_claim"],
+        sources=source_objs,
+        timestamp=datetime.fromisoformat(row["timestamp"]),
+    )
+
+def save_analysis_result(result: AnalysisResult):
+    with conn:
+        conn.execute(
+            """
+            INSERT OR REPLACE INTO history
+            (id, claim, verdict, trust_score, confidence, explanation, why_misleading, bias_analysis, core_claim, sources, timestamp)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                result.id,
+                result.claim,
+                result.verdict.value,
+                result.trust_score,
+                result.confidence,
+                result.explanation,
+                result.why_misleading,
+                result.bias_analysis,
+                result.core_claim,
+                json.dumps([source.dict() for source in result.sources]),
+                result.timestamp.isoformat(),
+            ),
+        )
+
+
+def fetch_history(limit: int = 10) -> List[HistoryItem]:
+    cursor = conn.execute(
+        "SELECT * FROM history ORDER BY timestamp DESC LIMIT ?", (limit,)
+    )
+    rows = cursor.fetchall()
+    items = []
+    for row in rows:
+        result = dict_to_analysis_result(row)
+        items.append(
+            HistoryItem(
+                id=result.id,
+                claim=result.claim[:100] + "..." if len(result.claim) > 100 else result.claim,
+                verdict=result.verdict,
+                trust_score=result.trust_score,
+                timestamp=result.timestamp,
+            )
+        )
+    return items
+
+
+def get_analysis_result(analysis_id: str) -> Optional[AnalysisResult]:
+    cursor = conn.execute("SELECT * FROM history WHERE id = ?", (analysis_id,))
+    row = cursor.fetchone()
+    if not row:
+        return None
+    return dict_to_analysis_result(row)
 
 
 def extract_domain(source_url: Optional[str], claim: str) -> Optional[str]:
@@ -474,6 +612,40 @@ def health_check():
     return {"status": "healthy", "version": "1.0.0", "timestamp": datetime.now(timezone.utc)}
 
 
+@app.post("/api/auth/register", response_model=AuthResponse)
+async def auth_register(request: AuthRequest):
+    username = (request.username or "").strip()
+    password = request.password or ""
+
+    if not username or not password:
+        raise HTTPException(status_code=422, detail="Username and password are required")
+
+    if get_user(username):
+        raise HTTPException(status_code=409, detail="Username already exists")
+
+    create_user(username, password)
+    return AuthResponse(success=True, message="User registered successfully")
+
+
+@app.post("/api/auth/login", response_model=AuthResponse)
+async def auth_login(request: AuthRequest):
+    username = (request.username or "").strip()
+    password = request.password or ""
+
+    if not username or not password:
+        raise HTTPException(status_code=422, detail="Username and password are required")
+
+    user = get_user(username)
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid username or password")
+
+    password_hash = hash_password(password)
+    if password_hash != user["password_hash"]:
+        raise HTTPException(status_code=401, detail="Invalid username or password")
+
+    return AuthResponse(success=True, message="Login successful")
+
+
 @app.post("/api/analyze", response_model=AnalysisResponse)
 async def analyze_claim(request: AnalysisRequest):
     """Analyze a claim and return credibility results."""
@@ -554,8 +726,8 @@ async def analyze_claim(request: AnalysisRequest):
         timestamp=datetime.now(timezone.utc),
     )
 
-    # Store in history
-    _history.append(result)
+    # Store in history (persistent SQLite global DB)
+    save_analysis_result(result)
 
     return AnalysisResponse(success=True, data=result)
 
@@ -563,29 +735,16 @@ async def analyze_claim(request: AnalysisRequest):
 @app.get("/api/history")
 async def get_history(limit: int = 10):
     """Get recent analysis history."""
-    sorted_history = sorted(_history, key=lambda x: x.timestamp, reverse=True)
-    return {
-        "success": True,
-        "data": [
-            HistoryItem(
-                id=r.id,
-                claim=r.claim[:100] + "..." if len(r.claim) > 100 else r.claim,
-                verdict=r.verdict,
-                trust_score=r.trust_score,
-                timestamp=r.timestamp,
-            )
-            for r in sorted_history[:limit]
-        ]
-    }
+    return {"success": True, "data": [item.dict() for item in fetch_history(limit)]}
 
 
 @app.get("/api/analysis/{analysis_id}")
 async def get_analysis(analysis_id: str):
     """Get a specific analysis by ID."""
-    for result in _history:
-        if result.id == analysis_id:
-            return AnalysisResponse(success=True, data=result)
-    return {"success": False, "error": "Analysis not found"}
+    analysis = get_analysis_result(analysis_id)
+    if analysis:
+        return AnalysisResponse(success=True, data=analysis)
+    raise HTTPException(status_code=404, detail="Analysis not found")
 
 
 @app.get("/api/verify-sources")
