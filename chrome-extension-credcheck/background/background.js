@@ -21,9 +21,19 @@ chrome.runtime.onInstalled.addListener(() => {
 
 chrome.contextMenus.onClicked.addListener((info) => {
   if (info.menuItemId === 'vouchThisClaim' && info.selectionText) {
-    // Store selected text and open popup
-    chrome.storage.local.set({ pendingText: info.selectionText }, () => {
-      chrome.action.openPopup();
+    // Send selection to content script to show tooltip
+    chrome.tabs.query({ active: true, currentWindow: true }).then(([tab]) => {
+      if (tab && tab.id) {
+        chrome.tabs.sendMessage(tab.id, {
+          type: 'SHOW_TOOLTIP',
+          text: info.selectionText,
+        }).catch(() => {
+          // Fallback: open popup
+          chrome.storage.local.set({ pendingText: info.selectionText }, () => {
+            chrome.action.openPopup();
+          });
+        });
+      }
     });
   }
 });
@@ -60,6 +70,13 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
         analysisCount: (res.history || []).length,
       });
     });
+    return true;
+  }
+
+  if (request.type === 'CHECK_SELECTION') {
+    handleAnalyzeText(request.text)
+      .then(result => sendResponse({ success: true, data: result }))
+      .catch(error => sendResponse({ success: false, error: error.message }));
     return true;
   }
 });
@@ -137,9 +154,11 @@ async function fetchWithTimeout(url, options, timeout = 15000) {
 // ============================================
 // KEEP SERVICE WORKER ALIVE
 // ============================================
-chrome.alarms.create('keepAlive', { periodInMinutes: 4.9 });
-chrome.alarms.onAlarm.addListener(() => {
-  // Service worker stays alive
-});
+if (chrome.alarms) {
+  chrome.alarms.create('keepAlive', { periodInMinutes: 4.9 });
+  chrome.alarms.onAlarm.addListener(() => {
+    // Service worker stays alive
+  });
+}
 
 console.log('Vouch background service worker loaded');
