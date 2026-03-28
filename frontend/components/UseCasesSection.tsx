@@ -92,40 +92,40 @@ const colorMap: Record<
   { bg: string; text: string; border: string; icon: string }
 > = {
   blue: {
-    bg: "hover:bg-blue-50 dark:hover:bg-blue-500/5",
-    text: "text-blue-600 dark:text-blue-400",
-    border: "border-transparent hover:border-blue-200 dark:hover:border-blue-800",
-    icon: "bg-blue-100 dark:bg-blue-500/10",
+    bg: "hover:bg-blue-500/8",
+    text: "text-blue-300",
+    border: "border-transparent hover:border-blue-500/25",
+    icon: "bg-blue-500/10",
   },
   purple: {
-    bg: "hover:bg-purple-50 dark:hover:bg-purple-500/5",
-    text: "text-purple-600 dark:text-purple-400",
-    border: "border-transparent hover:border-purple-200 dark:hover:border-purple-800",
-    icon: "bg-purple-100 dark:bg-purple-500/10",
+    bg: "hover:bg-purple-500/8",
+    text: "text-purple-300",
+    border: "border-transparent hover:border-purple-500/25",
+    icon: "bg-purple-500/10",
   },
   red: {
-    bg: "hover:bg-red-50 dark:hover:bg-red-500/5",
-    text: "text-red-600 dark:text-red-400",
-    border: "border-transparent hover:border-red-200 dark:hover:border-red-800",
-    icon: "bg-red-100 dark:bg-red-500/10",
+    bg: "hover:bg-red-500/8",
+    text: "text-red-300",
+    border: "border-transparent hover:border-red-500/25",
+    icon: "bg-red-500/10",
   },
   emerald: {
-    bg: "hover:bg-emerald-50 dark:hover:bg-emerald-500/5",
-    text: "text-emerald-600 dark:text-emerald-400",
-    border: "border-transparent hover:border-emerald-200 dark:hover:border-emerald-800",
-    icon: "bg-emerald-100 dark:bg-emerald-500/10",
+    bg: "hover:bg-emerald-500/8",
+    text: "text-emerald-300",
+    border: "border-transparent hover:border-emerald-500/25",
+    icon: "bg-emerald-500/10",
   },
 };
 
 export function UseCasesSection() {
   return (
-    <section className="py-20 sm:py-28 bg-white dark:bg-zinc-900/50">
+    <section className="bg-transparent py-20 sm:py-28">
       <div className="max-w-5xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-16">
-          <h2 className="text-3xl sm:text-4xl font-bold text-zinc-900 dark:text-zinc-50 tracking-tight">
+          <h2 className="text-3xl font-bold tracking-tight text-zinc-100 sm:text-4xl">
             Use cases
           </h2>
-          <p className="mt-4 text-lg text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto">
+          <p className="mx-auto mt-4 max-w-2xl text-lg text-white/90">
             Facticity works best anywhere a fast reference-source check would help
           </p>
         </div>
@@ -136,17 +136,17 @@ export function UseCasesSection() {
             return (
               <div
                 key={useCase.title}
-                className={`group p-5 rounded-2xl border ${colors.border} bg-zinc-50 dark:bg-zinc-900 ${colors.bg} transition-all duration-300 cursor-default`}
+                className={`group cursor-default rounded-2xl border bg-zinc-900 p-5 transition-all duration-300 ${colors.border} ${colors.bg}`}
               >
                 <div
                   className={`inline-flex items-center justify-center w-12 h-12 rounded-xl ${colors.icon} ${colors.text} mb-4 transition-transform duration-300 group-hover:scale-110`}
                 >
                   {useCase.icon}
                 </div>
-                <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
+                <h3 className="mb-2 text-base font-semibold text-zinc-100">
                   {useCase.title}
                 </h3>
-                <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                <p className="text-sm leading-relaxed text-white/90">
                   {useCase.description}
                 </p>
               </div>

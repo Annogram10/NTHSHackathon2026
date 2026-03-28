@@ -283,7 +283,7 @@ export function GlowyWavesHero() {
 
   return (
     <section
-      className="relative isolate flex min-h-screen w-full items-center justify-center overflow-hidden bg-background pt-16"
+      className="relative isolate flex min-h-screen w-full items-center justify-center overflow-hidden bg-transparent pt-16"
       role="region"
       aria-label="Glowing waves hero section"
     >
@@ -294,9 +294,9 @@ export function GlowyWavesHero() {
       />
 
       <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute left-1/2 top-0 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-foreground/[0.035] blur-[140px] dark:bg-foreground/[0.06]" />
-        <div className="absolute bottom-0 right-0 h-[360px] w-[360px] rounded-full bg-foreground/[0.025] blur-[120px] dark:bg-foreground/[0.05]" />
-        <div className="absolute left-1/4 top-1/2 h-[400px] w-[400px] rounded-full bg-primary/[0.02] blur-[150px] dark:bg-primary/[0.05]" />
+        <div className="absolute left-1/2 top-0 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-purple-400/8 blur-[140px]" />
+        <div className="absolute bottom-0 right-0 h-[360px] w-[360px] rounded-full bg-fuchsia-500/8 blur-[120px]" />
+        <div className="absolute left-1/4 top-1/2 h-[400px] w-[400px] rounded-full bg-purple-500/10 blur-[150px]" />
       </div>
 
       <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-col items-center px-6 py-24 text-center md:px-8 lg:px-12">
@@ -308,25 +308,25 @@ export function GlowyWavesHero() {
         >
           <motion.div
             variants={itemVariants}
-            className="mb-6 inline-flex items-center gap-2 rounded-full border border-border/40 bg-background/60 px-4 py-2 text-xs font-semibold uppercase tracking-[0.25em] text-foreground/70 dark:border-border/60 dark:bg-background/70 dark:text-foreground/80"
+            className="mb-6 inline-flex items-center gap-2 rounded-full border border-zinc-700 bg-zinc-950/65 px-4 py-2 text-xs font-semibold uppercase tracking-[0.25em] text-white"
           >
-            <Sparkles className="h-4 w-4 text-primary" aria-hidden="true" />
+            <Sparkles className="h-4 w-4 text-purple-400/80" aria-hidden="true" />
             Facticity live verifier
           </motion.div>
 
           <motion.h1
             variants={itemVariants}
-            className="mb-6 text-4xl font-semibold tracking-tight text-foreground md:text-6xl lg:text-7xl"
+            className="mb-6 text-4xl font-semibold tracking-tight text-zinc-100 md:text-6xl lg:text-7xl"
           >
             Fact-check articles with{" "}
-            <span className="bg-gradient-to-r from-primary via-primary/60 to-foreground/80 bg-clip-text text-transparent">
+            <span className="text-white">
               website credibility built in
             </span>
           </motion.h1>
 
           <motion.p
             variants={itemVariants}
-            className="mx-auto mb-10 max-w-3xl text-lg text-foreground/70 md:text-2xl"
+            className="mx-auto mb-10 max-w-3xl text-lg text-white/90 md:text-2xl"
           >
             Paste a URL or type a claim. Facticity benchmarks the statement
             against reference sources like Wikipedia and Britannica, then blends
@@ -353,7 +353,7 @@ export function GlowyWavesHero() {
               <Button
                 size="lg"
                 variant="outline"
-                className="rounded-full border-border/40 bg-background/60 px-8 text-base text-foreground/80 backdrop-blur transition-all hover:border-border/60 hover:bg-background/70 dark:border-border/50 dark:bg-background/40 dark:text-foreground/70 dark:hover:border-border/70 dark:hover:bg-background/50"
+                className="rounded-full border border-purple-400/35 bg-linear-to-r from-purple-500/20 via-fuchsia-500/16 to-purple-400/20 px-8 text-base text-white shadow-lg shadow-purple-900/20 backdrop-blur-md transition-all hover:border-purple-300/50 hover:from-purple-500/30 hover:via-fuchsia-500/24 hover:to-purple-400/30 hover:shadow-purple-700/30"
               >
                 How it works
               </Button>
@@ -362,12 +362,12 @@ export function GlowyWavesHero() {
 
           <motion.ul
             variants={itemVariants}
-            className="mb-12 flex flex-wrap items-center justify-center gap-3 text-xs uppercase tracking-[0.2em] text-foreground/70 dark:text-foreground/80"
+            className="mb-12 flex flex-wrap items-center justify-center gap-3 text-xs uppercase tracking-[0.2em] text-white"
           >
             {highlightPills.map((pill) => (
               <li
                 key={pill}
-                className="rounded-full border border-border/40 bg-background/60 px-4 py-2 backdrop-blur dark:border-border/60 dark:bg-background/70"
+                className="rounded-full border border-zinc-700 bg-zinc-950/65 px-4 py-2 backdrop-blur"
               >
                 {pill}
               </li>
@@ -376,7 +376,7 @@ export function GlowyWavesHero() {
 
           <motion.div
             variants={statsVariants}
-            className="grid gap-4 rounded-2xl border border-border/30 bg-background/60 p-6 backdrop-blur-sm dark:border-border/60 dark:bg-background/70 sm:grid-cols-3"
+            className="grid gap-4 rounded-2xl border border-zinc-700 bg-zinc-950/65 p-6 backdrop-blur-sm sm:grid-cols-3"
           >
             {heroStats.map((stat) => (
               <motion.div
@@ -384,10 +384,10 @@ export function GlowyWavesHero() {
                 variants={itemVariants}
                 className="space-y-1"
               >
-                <div className="text-xs uppercase tracking-[0.3em] text-foreground/50 dark:text-foreground/60">
+                <div className="text-xs uppercase tracking-[0.3em] text-white/70">
                   {stat.label}
                 </div>
-                <div className="text-3xl font-semibold text-foreground">
+                <div className="text-3xl font-semibold text-zinc-100">
                   {stat.value}
                 </div>
               </motion.div>

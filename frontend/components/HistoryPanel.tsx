@@ -23,15 +23,15 @@ function formatTimeAgo(dateString: string): string {
 }
 
 function getScoreColor(score: number): string {
-  if (score >= 75) return "text-emerald-600";
-  if (score >= 50) return "text-amber-600";
-  return "text-red-600";
+  if (score >= 75) return "text-emerald-400";
+  if (score >= 50) return "text-amber-400";
+  return "text-red-400";
 }
 
 export function HistoryPanel({ items, onSelect, isLoading }: HistoryPanelProps) {
   if (isLoading) {
     return (
-      <div className="bg-white dark:bg-zinc-900 rounded-2xl p-5 border border-zinc-200 dark:border-zinc-800 shadow-sm">
+      <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 shadow-sm">
         <div className="flex items-center gap-2 mb-4">
           <span className="text-zinc-400">
             <svg
@@ -62,9 +62,9 @@ export function HistoryPanel({ items, onSelect, isLoading }: HistoryPanelProps) 
 
   if (items.length === 0) {
     return (
-      <div className="bg-white dark:bg-zinc-900 rounded-2xl p-5 border border-zinc-200 dark:border-zinc-800 shadow-sm">
+      <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 shadow-sm">
         <div className="flex items-center gap-2 mb-3">
-          <span className="text-zinc-400 dark:text-zinc-500">
+          <span className="text-zinc-500">
             <svg
               className="w-5 h-5"
               fill="none"
@@ -79,11 +79,11 @@ export function HistoryPanel({ items, onSelect, isLoading }: HistoryPanelProps) 
               />
             </svg>
           </span>
-          <h3 className="font-semibold text-zinc-900 dark:text-zinc-100">
+          <h3 className="font-semibold text-zinc-100">
             Recent Checks
           </h3>
         </div>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 text-center py-6">
+        <p className="py-6 text-center text-sm text-white/90">
           No claims analyzed yet. Try the demo to get started!
         </p>
       </div>
@@ -91,9 +91,9 @@ export function HistoryPanel({ items, onSelect, isLoading }: HistoryPanelProps) 
   }
 
   return (
-    <div className="bg-white dark:bg-zinc-900 rounded-2xl p-5 border border-zinc-200 dark:border-zinc-800 shadow-sm">
+    <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 shadow-sm">
       <div className="flex items-center gap-2 mb-4">
-        <span className="text-blue-500">
+        <span className="text-purple-400">
           <svg
             className="w-5 h-5"
             fill="none"
@@ -108,10 +108,10 @@ export function HistoryPanel({ items, onSelect, isLoading }: HistoryPanelProps) 
             />
           </svg>
         </span>
-        <h3 className="font-semibold text-zinc-900 dark:text-zinc-100">
+        <h3 className="font-semibold text-zinc-100">
           Recent Checks
         </h3>
-        <span className="text-xs text-zinc-400 dark:text-zinc-500 ml-auto">
+        <span className="ml-auto text-xs text-zinc-400">
           {items.length} total
         </span>
       </div>
@@ -121,10 +121,10 @@ export function HistoryPanel({ items, onSelect, isLoading }: HistoryPanelProps) 
           <button
             key={item.id}
             onClick={() => onSelect(item.claim)}
-            className="w-full text-left p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors group"
+            className="group w-full rounded-xl border border-zinc-800 bg-zinc-950/80 p-3 text-left transition-colors hover:bg-zinc-900"
           >
             <div className="flex items-start justify-between gap-2 mb-1.5">
-              <span className="text-xs text-zinc-400 dark:text-zinc-500 group-hover:text-zinc-500 dark:group-hover:text-zinc-400 transition-colors">
+              <span className="text-xs text-zinc-400 transition-colors group-hover:text-zinc-300">
                 {formatTimeAgo(item.analyzedAt)}
               </span>
               <div className="flex items-center gap-2">
@@ -138,15 +138,15 @@ export function HistoryPanel({ items, onSelect, isLoading }: HistoryPanelProps) 
                 <VerdictBadge verdict={item.verdict} size="sm" />
               </div>
             </div>
-            <p className="text-sm text-zinc-700 dark:text-zinc-300 line-clamp-2 leading-snug">
+            <p className="line-clamp-2 text-sm leading-snug text-zinc-100">
               {item.claim}
             </p>
           </button>
         ))}
       </div>
 
-      <div className="mt-4 pt-3 border-t border-zinc-100 dark:border-zinc-800">
-        <button className="w-full text-xs text-center text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors">
+      <div className="mt-4 border-t border-zinc-800 pt-3">
+        <button className="w-full text-center text-xs font-medium text-purple-300 transition-colors hover:text-purple-200">
           View all history
         </button>
       </div>

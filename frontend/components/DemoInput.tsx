@@ -41,37 +41,37 @@ export function DemoInput({ onSubmit, isLoading }: DemoInputProps) {
   };
 
   return (
-    <div className="bg-white dark:bg-zinc-900 rounded-2xl p-6 shadow-xl border border-zinc-200 dark:border-zinc-800">
+    <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6 shadow-xl">
       <div className="mb-4">
-        <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+        <h3 className="text-lg font-semibold text-zinc-100">
           Fact-Check a URL or Claim
         </h3>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+        <p className="mt-1 text-sm text-white/90">
           In URL mode, we fetch the page and pull the headline, publisher, and author automatically. In claim mode, you can check a statement directly.
         </p>
       </div>
 
       <div className="mb-4 flex flex-wrap items-center gap-2">
-        <span className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-400 dark:text-zinc-500">
+        <span className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-400">
           Sources
         </span>
-        <span className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700 dark:border-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+        <span className="rounded-full border border-purple-800 bg-purple-950/40 px-3 py-1 text-xs font-medium text-purple-300">
           Wikipedia
         </span>
-        <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300">
+        <span className="rounded-full border border-purple-800 bg-purple-950/40 px-3 py-1 text-xs font-medium text-purple-300">
           Britannica
         </span>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid grid-cols-2 gap-2 rounded-2xl bg-zinc-100 p-1 dark:bg-zinc-800">
+        <div className="grid grid-cols-2 gap-2 rounded-2xl bg-zinc-800 p-1">
           <button
             type="button"
             onClick={() => setMode("url")}
             className={`rounded-xl px-4 py-2.5 text-sm font-medium transition-colors ${
               mode === "url"
-                ? "bg-white text-zinc-900 shadow-sm dark:bg-zinc-900 dark:text-zinc-100"
-                : "text-zinc-500 dark:text-zinc-400"
+                ? "bg-zinc-950 text-zinc-100 shadow-sm"
+                : "text-zinc-400"
             }`}
           >
             Check URL
@@ -81,8 +81,8 @@ export function DemoInput({ onSubmit, isLoading }: DemoInputProps) {
             onClick={() => setMode("claim")}
             className={`rounded-xl px-4 py-2.5 text-sm font-medium transition-colors ${
               mode === "claim"
-                ? "bg-white text-zinc-900 shadow-sm dark:bg-zinc-900 dark:text-zinc-100"
-                : "text-zinc-500 dark:text-zinc-400"
+                ? "bg-zinc-950 text-zinc-100 shadow-sm"
+                : "text-zinc-400"
             }`}
           >
             Check Claim
@@ -92,7 +92,7 @@ export function DemoInput({ onSubmit, isLoading }: DemoInputProps) {
         {mode === "url" ? (
           <>
             <label className="block">
-              <span className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-zinc-500 dark:text-zinc-400">
+              <span className="mb-1.5 block text-xs font-medium uppercase tracking-[0.18em] text-zinc-300">
                 Article URL
               </span>
               <input
@@ -100,7 +100,7 @@ export function DemoInput({ onSubmit, isLoading }: DemoInputProps) {
                 value={sourceUrl}
                 onChange={(e) => setSourceUrl(e.target.value)}
                 placeholder="https://www.nbcnews.com/..."
-                className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder:text-zinc-500"
+                className="w-full rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-3 text-sm text-zinc-100 placeholder:text-zinc-500 transition-all focus:border-purple-500/50 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
                 disabled={isLoading}
               />
             </label>
@@ -111,12 +111,12 @@ export function DemoInput({ onSubmit, isLoading }: DemoInputProps) {
               value={claim}
               onChange={(e) => setClaim(e.target.value)}
               placeholder="Enter a claim to fact-check against reference databases..."
-              className="w-full h-32 px-4 py-3 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
+              className="h-32 w-full resize-none rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-3 text-zinc-100 placeholder:text-zinc-500 transition-all focus:border-purple-500/50 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
               disabled={isLoading}
             />
             <div className="absolute bottom-3 right-3 flex items-center gap-1">
               {claim.length > 0 && (
-                <span className="text-xs text-zinc-400 dark:text-zinc-500">
+                <span className="text-xs text-zinc-400">
                   {claim.length} chars
                 </span>
               )}
@@ -126,7 +126,7 @@ export function DemoInput({ onSubmit, isLoading }: DemoInputProps) {
 
         {/* Sample claim chips */}
         <div className="flex flex-wrap gap-2">
-          <span className="text-xs text-zinc-400 dark:text-zinc-500 self-center">
+          <span className="self-center text-xs text-white/90">
             Try:
           </span>
           {sampleClaims.map((chip) => (
@@ -135,14 +135,14 @@ export function DemoInput({ onSubmit, isLoading }: DemoInputProps) {
               type="button"
               onClick={() => handleChipClick(chip)}
               disabled={isLoading}
-              className="text-xs px-3 py-1.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="rounded-full bg-zinc-800 px-3 py-1.5 text-xs text-zinc-400 transition-colors hover:bg-purple-950/50 hover:text-purple-300 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {chip.length > 30 ? chip.slice(0, 30) + "..." : chip}
             </button>
           ))}
         </div>
 
-        <p className="text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">
+        <p className="text-xs leading-relaxed text-white/90">
           URL mode judges both the page source and the extracted headline. Claim mode skips the page fetch and only checks the statement itself against benchmark sources.
         </p>
 
@@ -152,7 +152,7 @@ export function DemoInput({ onSubmit, isLoading }: DemoInputProps) {
             isLoading ||
             (mode === "url" ? !sourceUrl.trim() : !claim.trim())
           }
-          className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-zinc-300 dark:disabled:bg-zinc-700 text-white dark:text-zinc-100 font-semibold rounded-xl transition-all duration-200 flex items-center justify-center gap-2 disabled:cursor-not-allowed shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 disabled:shadow-none"
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-purple-600 px-4 py-3 font-semibold text-white shadow-lg shadow-purple-500/25 transition-all duration-200 hover:bg-purple-700 hover:shadow-purple-500/40 disabled:cursor-not-allowed disabled:bg-zinc-700 disabled:shadow-none"
         >
           {isLoading ? (
             <>

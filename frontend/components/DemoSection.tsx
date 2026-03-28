@@ -73,24 +73,24 @@ export function DemoSection() {
   return (
     <section
       id="demo"
-      className="py-20 sm:py-28 bg-gradient-to-b from-white via-zinc-50 to-white dark:from-zinc-950 dark:via-black dark:to-zinc-950"
+      className="bg-transparent py-20 sm:py-28"
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-12">
-          <h2 className="text-3xl sm:text-4xl font-bold text-zinc-900 dark:text-zinc-50 tracking-tight">
+          <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
             Try Facticity
           </h2>
-          <p className="mt-4 text-lg text-zinc-600 dark:text-zinc-400">
+          <p className="mt-4 text-lg text-white/90">
             Check a claim against source databases and get a source-backed verdict
           </p>
-          <div className="mt-5 flex flex-wrap items-center justify-center gap-3 text-sm text-zinc-500 dark:text-zinc-400">
-            <span className="rounded-full border border-zinc-200 bg-white px-3 py-1.5 dark:border-zinc-800 dark:bg-zinc-900">
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-3 text-sm text-white">
+            <span className="rounded-full border border-zinc-700 bg-zinc-950/65 px-3 py-1.5">
               Wikipedia summaries
             </span>
-            <span className="rounded-full border border-zinc-200 bg-white px-3 py-1.5 dark:border-zinc-800 dark:bg-zinc-900">
+            <span className="rounded-full border border-zinc-700 bg-zinc-950/65 px-3 py-1.5">
               Britannica references
             </span>
-            <span className="rounded-full border border-zinc-200 bg-white px-3 py-1.5 dark:border-zinc-800 dark:bg-zinc-900">
+            <span className="rounded-full border border-zinc-700 bg-zinc-950/65 px-3 py-1.5">
               Evidence links
             </span>
           </div>

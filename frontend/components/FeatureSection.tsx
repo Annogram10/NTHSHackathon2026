@@ -92,40 +92,40 @@ const colorMap: Record<
   { bg: string; text: string; border: string; icon: string }
 > = {
   blue: {
-    bg: "bg-blue-50 dark:bg-blue-500/10",
-    text: "text-blue-600 dark:text-blue-400",
-    border: "group-hover:border-blue-300 dark:group-hover:border-blue-500/30",
-    icon: "bg-blue-100 dark:bg-blue-500/20",
+    bg: "bg-blue-500/8",
+    text: "text-blue-300",
+    border: "group-hover:border-blue-500/30",
+    icon: "bg-blue-500/12",
   },
   amber: {
-    bg: "bg-amber-50 dark:bg-amber-500/10",
-    text: "text-amber-600 dark:text-amber-400",
-    border: "group-hover:border-amber-300 dark:group-hover:border-amber-500/30",
-    icon: "bg-amber-100 dark:bg-amber-500/20",
+    bg: "bg-amber-500/8",
+    text: "text-amber-300",
+    border: "group-hover:border-amber-500/30",
+    icon: "bg-amber-500/12",
   },
   emerald: {
-    bg: "bg-emerald-50 dark:bg-emerald-500/10",
-    text: "text-emerald-600 dark:text-emerald-400",
-    border: "group-hover:border-emerald-300 dark:group-hover:border-emerald-500/30",
-    icon: "bg-emerald-100 dark:bg-emerald-500/20",
+    bg: "bg-emerald-500/8",
+    text: "text-emerald-300",
+    border: "group-hover:border-emerald-500/30",
+    icon: "bg-emerald-500/12",
   },
   purple: {
-    bg: "bg-purple-50 dark:bg-purple-500/10",
-    text: "text-purple-600 dark:text-purple-400",
-    border: "group-hover:border-purple-300 dark:group-hover:border-purple-500/30",
-    icon: "bg-purple-100 dark:bg-purple-500/20",
+    bg: "bg-purple-500/8",
+    text: "text-purple-300",
+    border: "group-hover:border-purple-500/30",
+    icon: "bg-purple-500/12",
   },
 };
 
 export function FeatureSection() {
   return (
-    <section className="py-20 sm:py-28 bg-white dark:bg-zinc-900/50">
+    <section className="bg-transparent py-20 sm:py-28">
       <div className="max-w-5xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-16">
-          <h2 className="text-3xl sm:text-4xl font-bold text-zinc-900 dark:text-zinc-50 tracking-tight">
+          <h2 className="text-3xl font-bold tracking-tight text-zinc-100 sm:text-4xl">
             Built for source-based fact checking
           </h2>
-          <p className="mt-4 text-lg text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto">
+          <p className="mx-auto mt-4 max-w-2xl text-lg text-white/90">
             The frontend is designed to keep the evidence visible, not hidden behind a black-box answer.
           </p>
         </div>
@@ -136,17 +136,17 @@ export function FeatureSection() {
             return (
               <div
                 key={feature.title}
-                className={`group relative p-6 bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm hover:shadow-lg transition-all duration-300 ${colors.border}`}
+                className={`group relative rounded-2xl border border-zinc-800 bg-zinc-900 p-6 shadow-sm transition-all duration-300 hover:shadow-lg ${colors.border}`}
               >
                 <div
                   className={`inline-flex items-center justify-center w-12 h-12 rounded-xl ${colors.icon} mb-4`}
                 >
                   <span className={colors.text}>{feature.icon}</span>
                 </div>
-                <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
+                <h3 className="mb-2 text-lg font-semibold text-zinc-100">
                   {feature.title}
                 </h3>
-                <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                <p className="text-sm leading-relaxed text-white/90">
                   {feature.description}
                 </p>
               </div>

@@ -74,14 +74,14 @@ export function HowItWorksSection() {
   return (
     <section
       id="how-it-works"
-      className="py-20 sm:py-28 bg-gradient-to-b from-zinc-50 to-white dark:from-zinc-950 dark:to-zinc-900"
+      className="bg-transparent py-20 sm:py-28"
     >
       <div className="max-w-5xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-16">
-          <h2 className="text-3xl sm:text-4xl font-bold text-zinc-900 dark:text-zinc-50 tracking-tight">
+          <h2 className="text-3xl font-bold tracking-tight text-zinc-100 sm:text-4xl">
             How it works
           </h2>
-          <p className="mt-4 text-lg text-zinc-600 dark:text-zinc-400">
+          <p className="mt-4 text-lg text-white/90">
             Three steps from claim to evidence-backed verdict
           </p>
         </div>
@@ -91,25 +91,25 @@ export function HowItWorksSection() {
             <div key={step.number} className="relative">
               {/* Connector line */}
               {index < steps.length - 1 && (
-                <div className="hidden sm:block absolute top-10 left-[calc(50%+2rem)] w-[calc(100%-4rem)] h-0.5 bg-gradient-to-r from-blue-200 to-blue-300 dark:from-blue-800 dark:to-blue-700" />
+                <div className="absolute left-[calc(50%+2rem)] top-10 hidden h-0.5 w-[calc(100%-4rem)] bg-gradient-to-r from-purple-900 to-purple-700 sm:block" />
               )}
 
               <div className="relative flex flex-col items-center text-center">
                 {/* Step number circle */}
-                <div className="relative w-20 h-20 bg-white dark:bg-zinc-900 border-2 border-blue-200 dark:border-blue-800 rounded-full flex items-center justify-center shadow-lg mb-6">
-                  <div className="absolute inset-0 bg-blue-500/10 rounded-full" />
-                  <span className="text-blue-600 dark:text-blue-400 z-10">
+                <div className="relative mb-6 flex h-20 w-20 items-center justify-center rounded-full border-2 border-purple-900 bg-zinc-900 shadow-lg">
+                  <div className="absolute inset-0 rounded-full bg-purple-500/10" />
+                  <span className="z-10 text-purple-400">
                     {step.icon}
                   </span>
-                  <span className="absolute -top-2 -right-2 w-7 h-7 bg-blue-600 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-md">
+                  <span className="absolute -right-2 -top-2 flex h-7 w-7 items-center justify-center rounded-full bg-purple-600 text-xs font-bold text-white shadow-md">
                     {step.number}
                   </span>
                 </div>
 
-                <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
+                <h3 className="mb-2 text-lg font-semibold text-zinc-100">
                   {step.title}
                 </h3>
-                <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed max-w-xs">
+                <p className="max-w-xs text-sm leading-relaxed text-white/90">
                   {step.description}
                 </p>
               </div>

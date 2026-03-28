@@ -11,10 +11,10 @@ export const metadata: Metadata = {
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-white dark:bg-black">
+    <div className="min-h-screen bg-[linear-gradient(180deg,_#1d0d33_0%,_#150a27_14%,_#10081d_28%,_#0c0915_48%,_#09090c_72%,_#09090c_100%)] text-zinc-100">
       {/* Hero Section */}
       <header className="relative">
-        <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-black/80 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800">
+        <nav className="fixed top-0 left-0 right-0 z-50 border-b border-zinc-800/80 bg-[#09090c]/65 backdrop-blur-xl">
           <div className="max-w-6xl mx-auto px-4 sm:px-6">
             <div className="flex items-center justify-between h-16">
               <div className="flex items-center gap-2">
@@ -22,26 +22,26 @@ export default function Home() {
                   <div className="absolute inset-0 bg-blue-600 rounded-full" />
                   <div className="absolute inset-0.5 bg-white rounded-full opacity-90" />
                 </div>
-                <span className="text-lg font-bold text-zinc-900 dark:text-zinc-100">
+                <span className="text-lg font-bold text-zinc-100">
                   Facticity
                 </span>
               </div>
               <div className="hidden sm:flex items-center gap-6">
                 <a
                   href="#how-it-works"
-                  className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+                  className="text-sm text-zinc-200 transition-colors hover:text-white"
                 >
                   How it works
                 </a>
                 <a
                   href="#demo"
-                  className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+                  className="text-sm text-zinc-200 transition-colors hover:text-white"
                 >
                   Demo
                 </a>
                 <a
                   href="#features"
-                  className="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+                  className="text-sm text-zinc-200 transition-colors hover:text-white"
                 >
                   Features
                 </a>
@@ -73,7 +73,7 @@ export default function Home() {
         <UseCasesSection />
 
         {/* Footer */}
-        <footer className="py-12 bg-zinc-100 dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800">
+        <footer className="border-t border-zinc-800/80 bg-[#09090c]/55 py-12 backdrop-blur-md">
           <div className="max-w-6xl mx-auto px-4 sm:px-6">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-2">
@@ -81,14 +81,14 @@ export default function Home() {
                   <div className="absolute inset-0 bg-blue-600 rounded-full" />
                   <div className="absolute inset-0.5 bg-white rounded-full opacity-90" />
                 </div>
-                <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
+                <span className="text-sm font-bold text-zinc-100">
                   Facticity
                 </span>
               </div>
-              <p className="text-sm text-zinc-500 dark:text-zinc-500">
+              <p className="text-sm text-zinc-200">
                 Source-backed fact checking for the internet, built to keep the evidence visible.
               </p>
-              <p className="text-xs text-zinc-400 dark:text-zinc-600">
+              <p className="text-xs text-zinc-300">
                 Built for NTHS Hackathon 2026
               </p>
             </div>
