@@ -6,6 +6,7 @@ import { AnalysisInput } from "@/lib/analysisService";
 interface DemoInputProps {
   onSubmit: (input: AnalysisInput) => void;
   isLoading: boolean;
+  isLoggedIn: boolean;
 }
 
 const sampleClaims = [
@@ -16,7 +17,7 @@ const sampleClaims = [
   "Sharks are older than trees.",
 ];
 
-export function DemoInput({ onSubmit, isLoading }: DemoInputProps) {
+export function DemoInput({ onSubmit, isLoading, isLoggedIn }: DemoInputProps) {
   const [mode, setMode] = useState<"url" | "claim">("url");
   const [claim, setClaim] = useState("");
   const [sourceUrl, setSourceUrl] = useState("");
@@ -53,14 +54,28 @@ export function DemoInput({ onSubmit, isLoading }: DemoInputProps) {
 
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <span className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-400">
-          Sources
+          {isLoggedIn ? "Connected APIs" : "Login Unlocks"}
         </span>
-        <span className="rounded-full border border-purple-800 bg-purple-950/40 px-3 py-1 text-xs font-medium text-purple-300">
-          Wikipedia
-        </span>
-        <span className="rounded-full border border-purple-800 bg-purple-950/40 px-3 py-1 text-xs font-medium text-purple-300">
-          Britannica
-        </span>
+        {isLoggedIn ? (
+          <>
+            <span className="rounded-full border border-purple-800 bg-purple-950/40 px-3 py-1 text-xs font-medium text-purple-300">
+              Google Fact Check
+            </span>
+            <span className="rounded-full border border-purple-800 bg-purple-950/40 px-3 py-1 text-xs font-medium text-purple-300">
+              NewsAPI
+            </span>
+            <span className="rounded-full border border-purple-800 bg-purple-950/40 px-3 py-1 text-xs font-medium text-purple-300">
+              GNews
+            </span>
+            <span className="rounded-full border border-purple-800 bg-purple-950/40 px-3 py-1 text-xs font-medium text-purple-300">
+              Guardian
+            </span>
+          </>
+        ) : (
+          <span className="rounded-full border border-zinc-700 bg-zinc-950/60 px-3 py-1 text-xs font-medium text-zinc-300">
+            Live source API checks
+          </span>
+        )}
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -143,7 +158,9 @@ export function DemoInput({ onSubmit, isLoading }: DemoInputProps) {
         </div>
 
         <p className="text-xs leading-relaxed text-white/90">
-          URL mode judges both the page source and the extracted headline. Claim mode skips the page fetch and only checks the statement itself against benchmark sources.
+          {isLoggedIn
+            ? "URL mode judges both the page source and the extracted headline. Claim mode skips the page fetch and checks the statement against connected source APIs."
+            : "URL mode judges both the page source and the extracted headline. Sign in to unlock the full live source API layer for deeper verification."}
         </p>
 
         <button

@@ -9,7 +9,7 @@ import { AnalysisResultPanel } from "./AnalysisResultPanel";
 import { HistoryPanel } from "./HistoryPanel";
 import { useAuth, MAX_FREE_DEMO_USES } from "./AuthContext";
 
-export function DemoSection() {
+export function DemoSection({ checkerOnly = false }: { checkerOnly?: boolean }) {
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -35,7 +35,7 @@ export function DemoSection() {
   const handleAnalyze = async (input: AnalysisInput) => {
     if (!canUseDemo) {
       setError(
-        "Free demo limit reached (3 uses). Please log in to continue with unlimited demo checks."
+        "Free demo limit reached (3 uses). Please log in to continue with unlimited checks."
       );
       return;
     }
@@ -68,7 +68,7 @@ export function DemoSection() {
       console.error("Analysis failed:", error);
       setResult(null);
       setError(
-        "We could not complete the fact check right now. Make sure the backend is running so Wikipedia and Britannica sources can be queried."
+        "We could not complete the fact check right now. Make sure the backend is running so trusted source APIs can be queried."
       );
     } finally {
       setIsLoading(false);
@@ -86,34 +86,50 @@ export function DemoSection() {
 
   return (
     <section
-      id="demo"
+      id={checkerOnly ? "checker" : "demo"}
       className="bg-transparent py-20 sm:py-28"
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
-            Try Facticity
+            {checkerOnly ? "Fact Checker" : "Check with Facticity"}
           </h2>
           <p className="mt-4 text-lg text-white/90">
-            Check a claim against source databases and get a source-backed verdict
+            Check a claim against trusted sources and review the evidence behind the verdict
           </p>
           <div className="mt-5 flex flex-wrap items-center justify-center gap-3 text-sm text-white">
-            <span className="rounded-full border border-zinc-700 bg-zinc-950/65 px-3 py-1.5">
-              Wikipedia summaries
-            </span>
-            <span className="rounded-full border border-zinc-700 bg-zinc-950/65 px-3 py-1.5">
-              Britannica references
-            </span>
-            <span className="rounded-full border border-zinc-700 bg-zinc-950/65 px-3 py-1.5">
-              Evidence links
-            </span>
+            {isLoggedIn ? (
+              <>
+                <span className="rounded-full border border-zinc-700 bg-zinc-950/65 px-3 py-1.5">
+                  Fact-check APIs
+                </span>
+                <span className="rounded-full border border-zinc-700 bg-zinc-950/65 px-3 py-1.5">
+                  News validation
+                </span>
+                <span className="rounded-full border border-zinc-700 bg-zinc-950/65 px-3 py-1.5">
+                  Evidence links
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="rounded-full border border-zinc-700 bg-zinc-950/65 px-3 py-1.5">
+                  Source scoring
+                </span>
+                <span className="rounded-full border border-zinc-700 bg-zinc-950/65 px-3 py-1.5">
+                  Claim review
+                </span>
+                <span className="rounded-full border border-zinc-700 bg-zinc-950/65 px-3 py-1.5">
+                  Sign in for live APIs
+                </span>
+              </>
+            )}
           </div>
 
           <div className="mt-5 flex flex-wrap items-center justify-center gap-3 text-sm text-zinc-200">
             {isLoggedIn ? (
               <>
                 <p>
-                  Logged in as <strong>{username}</strong>. Unlimited demo access enabled.
+                  Logged in as <strong>{username}</strong>. Unlimited access enabled.
                 </p>
                 <div className="flex items-center gap-2">
                   <button
@@ -133,7 +149,7 @@ export function DemoSection() {
               </>
             ) : (
               <p>
-                Free demo uses: {demoUses}/{MAX_FREE_DEMO_USES}. Log in for unlimited access.
+                Free checks: {demoUses}/{MAX_FREE_DEMO_USES}. Log in to unlock the live API source layer and unlimited access.
               </p>
             )}
           </div>
@@ -143,7 +159,7 @@ export function DemoSection() {
           {/* Main content area */}
           <div className="lg:col-span-2 space-y-6">
             {/* Input */}
-            <DemoInput onSubmit={handleAnalyze} isLoading={isLoading} />
+            <DemoInput onSubmit={handleAnalyze} isLoading={isLoading} isLoggedIn={isLoggedIn} />
 
             {/* Results */}
             <div

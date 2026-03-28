@@ -84,7 +84,7 @@ export function HistoryPanel({ items, onSelect, isLoading }: HistoryPanelProps) 
           </h3>
         </div>
         <p className="py-6 text-center text-sm text-white/90">
-          No claims analyzed yet. Try the demo to get started!
+          No claims analyzed yet. Run a check to get started.
         </p>
       </div>
     );

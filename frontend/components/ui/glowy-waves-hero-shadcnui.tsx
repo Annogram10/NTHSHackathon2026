@@ -329,8 +329,8 @@ export function GlowyWavesHero() {
             className="mx-auto mb-10 max-w-3xl text-lg text-white/90 md:text-2xl"
           >
             Paste a URL or type a claim. Facticity benchmarks the statement
-            against reference sources like Wikipedia and Britannica, then blends
-            that with domain and article-level credibility signals.
+            against connected fact-check and news sources, then blends that
+            with domain and article-level credibility signals.
           </motion.p>
 
           <motion.div

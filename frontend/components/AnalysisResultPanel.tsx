@@ -339,7 +339,7 @@ export function AnalysisResultPanel({ result }: AnalysisResultPanelProps) {
               ))
             ) : (
               <div className="rounded-xl border border-dashed border-zinc-200 bg-zinc-50 p-4 text-sm text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900/50 dark:text-zinc-400">
-                No matching Wikipedia or Britannica references were returned for this claim yet.
+                No matching connected source references were returned for this claim yet.
               </div>
             )}
           </div>
