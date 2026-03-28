@@ -1,11 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { AnalysisResult, HistoryItem } from "@/types/facticity";
 import { analyzeClaim, AnalysisInput, getHistory } from "@/lib/analysisService";
 import { DemoInput } from "./DemoInput";
 import { AnalysisResultPanel } from "./AnalysisResultPanel";
 import { HistoryPanel } from "./HistoryPanel";
+import { useAuth, MAX_FREE_DEMO_USES } from "./AuthContext";
 
 export function DemoSection() {
   const [result, setResult] = useState<AnalysisResult | null>(null);
@@ -13,6 +15,7 @@ export function DemoSection() {
   const [isLoading, setIsLoading] = useState(false);
   const [isHistoryLoading, setIsHistoryLoading] = useState(true);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const { isLoggedIn, username, demoUses, canUseDemo, incrementDemoUsage, logout } = useAuth();
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -30,6 +33,17 @@ export function DemoSection() {
   }, []);
 
   const handleAnalyze = async (input: AnalysisInput) => {
+    if (!canUseDemo) {
+      setError(
+        "Free demo limit reached (3 uses). Please log in to continue with unlimited demo checks."
+      );
+      return;
+    }
+
+    if (!isLoggedIn) {
+      incrementDemoUsage();
+    }
+
     setIsLoading(true);
     setIsTransitioning(true);
     setError(null);
@@ -93,6 +107,35 @@ export function DemoSection() {
             <span className="rounded-full border border-zinc-700 bg-zinc-950/65 px-3 py-1.5">
               Evidence links
             </span>
+          </div>
+
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-3 text-sm text-zinc-200">
+            {isLoggedIn ? (
+              <>
+                <p>
+                  Logged in as <strong>{username}</strong>. Unlimited demo access enabled.
+                </p>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={logout}
+                    className="rounded-lg border border-zinc-700 px-3 py-1.5 hover:bg-zinc-800"
+                  >
+                    Logout
+                  </button>
+                  <Link
+                    href="/download"
+                    className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm text-white hover:bg-blue-700"
+                  >
+                    Download Extension
+                  </Link>
+                </div>
+              </>
+            ) : (
+              <p>
+                Free demo uses: {demoUses}/{MAX_FREE_DEMO_USES}. Log in for unlimited access.
+              </p>
+            )}
           </div>
         </div>
 
