@@ -22,15 +22,23 @@ export default function HomePageClient() {
                 <span className="text-lg font-bold text-zinc-100">Facticity</span>
               </div>
               <div className="hidden sm:flex items-center gap-6">
-                <a href="#how-it-works" className="text-sm text-zinc-200 transition-colors hover:text-white">
-                  How it works
-                </a>
-                <a href="#demo" className="text-sm text-zinc-200 transition-colors hover:text-white">
-                  Demo
-                </a>
-                <a href="#features" className="text-sm text-zinc-200 transition-colors hover:text-white">
-                  Features
-                </a>
+                {isLoggedIn ? (
+                  <a href="#checker" className="text-sm text-zinc-200 transition-colors hover:text-white">
+                    Checker
+                  </a>
+                ) : (
+                  <>
+                    <a href="#how-it-works" className="text-sm text-zinc-200 transition-colors hover:text-white">
+                      How it works
+                    </a>
+                    <a href="#demo" className="text-sm text-zinc-200 transition-colors hover:text-white">
+                      Demo
+                    </a>
+                    <a href="#features" className="text-sm text-zinc-200 transition-colors hover:text-white">
+                      Features
+                    </a>
+                  </>
+                )}
               </div>
               <div className="flex items-center gap-2">
                 {isLoggedIn ? (
@@ -45,12 +53,14 @@ export default function HomePageClient() {
                     Login
                   </Link>
                 )}
-                <a
-                  href="#demo"
-                  className="px-4 py-2 text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-                >
-                  Try Demo
-                </a>
+                {!isLoggedIn && (
+                  <a
+                    href="#demo"
+                    className="px-4 py-2 text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                  >
+                    Try Demo
+                  </a>
+                )}
               </div>
             </div>
           </div>
@@ -58,12 +68,19 @@ export default function HomePageClient() {
       </header>
 
       <main>
-        <GlowyWavesHero />
-
-        <DemoSection />
-        <HowItWorksSection />
-        <FeatureSection />
-        <UseCasesSection />
+        {isLoggedIn ? (
+          <div className="pt-16">
+            <DemoSection checkerOnly />
+          </div>
+        ) : (
+          <>
+            <GlowyWavesHero />
+            <DemoSection />
+            <HowItWorksSection />
+            <FeatureSection />
+            <UseCasesSection />
+          </>
+        )}
 
         <footer className="border-t border-zinc-800/80 bg-[#09090c]/55 py-12 backdrop-blur-md">
           <div className="max-w-6xl mx-auto px-4 sm:px-6">

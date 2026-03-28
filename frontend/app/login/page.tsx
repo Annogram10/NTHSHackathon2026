@@ -34,7 +34,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-950/70 p-8 shadow-xl">
         <h1 className="text-2xl font-bold mb-4">Login / Register</h1>
         <p className="mb-5 text-sm text-zinc-300">
-          Use the demo up to 3 times before login. After login, unlimited usage and download button are unlocked.
+          This is currently a frontend-only login gate. It does not create a real backend account yet, and login state is not saved to browser storage anymore.
         </p>
         <form onSubmit={handleSubmit} className="space-y-4">
           <label className="block text-sm">
@@ -73,7 +73,7 @@ export default function LoginPage() {
         </form>
 
         <p className="mt-4 text-sm text-zinc-400">
-          Already have an account? Just log in. Otherwise the same form creates one.
+          Enter any username and password to continue for this session.
         </p>
         <p className="mt-4 text-sm">
           <Link href="/" className="text-blue-400 hover:underline">
