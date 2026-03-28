@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CredCheck</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo">
+        <svg class="logo-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="logo-text">CredCheck</span>
+      </div>
+      <p class="tagline">Real-time Credibility Analysis</p>
+    </header>
+
+    <!-- Input Section -->
+    <section class="input-section" id="inputSection">
+      <textarea
+        id="claimInput"
+        class="claim-input"
+        placeholder="Paste content to verify credibility..."
+        rows="4"
+      ></textarea>
+      <div class="input-actions">
+        <button id="extractBtn" class="btn btn-secondary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+          </svg>
+          Extract Page
+        </button>
+        <button id="analyzeBtn" class="btn btn-primary">Check Credibility</button>
+      </div>
+    </section>
+
+    <!-- Loading Section -->
+    <section class="loading-section" id="loadingSection" style="display: none;">
+      <div class="loading-spinner"></div>
+      <p class="loading-text">Analyzing credibility...</p>
+      <p class="loading-subtext">Cross-referencing sources</p>
+    </section>
+
+    <!-- Result Section -->
+    <section class="result-section" id="resultSection" style="display: none;">
+      <div class="credibility-meter">
+        <div class="meter-header">
+          <span class="meter-label">Credibility Score</span>
+          <span id="credibilityScore" class="meter-value">0</span>
+        </div>
+        <div class="meter-track">
+          <div id="meterFill" class="meter-fill"></div>
+        </div>
+        <div class="meter-scale">
+          <span>Low</span>
+          <span>Medium</span>
+          <span>High</span>
+        </div>
+      </div>
+
+      <div class="verdict-card" id="verdictCard">
+        <div id="verdictIcon" class="verdict-icon"></div>
+        <div class="verdict-content">
+          <h3 id="verdictTitle" class="verdict-title">Verdict</h3>
+          <p id="verdictDescription" class="verdict-description"></p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 class="card-title">Assessment</h3>
+        <p id="assessment" class="card-text"></p>
+      </div>
+
+      <div class="card card-warning" id="issuesCard" style="display: none;">
+        <h3 class="card-title">Credibility Issues</h3>
+        <ul id="issuesList" class="issues-list"></ul>
+      </div>
+
+      <div class="sources-section">
+        <h3 class="section-title">Supporting Sources</h3>
+        <div id="sourcesList" class="sources-list"></div>
+      </div>
+
+      <div class="result-actions">
+        <button id="newAnalysisBtn" class="btn btn-secondary">Check Another</button>
+        <button id="shareBtn" class="btn btn-icon" title="Share result">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/>
+            <polyline points="16 6 12 2 8 6"/>
+            <line x1="12" y1="2" x2="12" y2="15"/>
+          </svg>
+        </button>
+      </div>
+    </section>
+
+    <!-- History Section -->
+    <section class="history-section" id="historySection">
+      <h3 class="section-title">Recent Checks</h3>
+      <div id="historyList" class="history-list"></div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <a href="#" id="openDashboard">Dashboard</a>
+      <span class="separator">•</span>
+      <a href="#" id="settingsLink">Settings</a>
+    </footer>
+  </div>
+
+  <script src="popup.js" type="module"></script>
+</body>
+</html>
