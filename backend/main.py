@@ -4,6 +4,8 @@ FastAPI-based fact-checking service with benchmark sources and
 basic website/domain credibility signals.
 """
 
+import json
+import os
 import re
 import uuid
 from datetime import datetime, timezone
@@ -11,15 +13,19 @@ from enum import Enum
 from typing import List, Optional
 from urllib.parse import urlparse
 
+import httpx
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
+from dotenv import load_dotenv
 
 from services.source_service import (
     fetch_article_metadata,
     search_all_sources,
     verify_claim_with_sources,
 )
+
+load_dotenv()
 
 app = FastAPI(title="CredCheck API", version="1.0.0")
 
@@ -98,6 +104,7 @@ _history: List[AnalysisResult] = []
 HIGH_CREDIBILITY_DOMAINS = {
     "apnews.com": 88,
     "bbc.com": 86,
+    "britannica.com": 95,
     "cdc.gov": 96,
     "nasa.gov": 97,
     "nbcnews.com": 84,
@@ -123,6 +130,9 @@ SATIRE_DOMAINS = {
     "thebeaverton.com": "Known satire site",
     "theonion.com": "Known satire site",
 }
+
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-5-mini")
 
 
 def extract_domain(source_url: Optional[str], claim: str) -> Optional[str]:
@@ -734,6 +744,18 @@ SITE_CREDIBILITY_DB = {
             {"name": "NPR", "url": "https://npr.org", "reason": "US public media"},
         ],
     },
+    "britannica.com": {
+        "credibilityScore": 95, "credibilityVerdict": "Highly Reliable",
+        "editorialBias": "Center", "ownership": "Encyclopaedia Britannica, Inc.",
+        "funding": "Subscriptions, educational licensing", "transparencyScore": 94,
+        "factCheckTrackRecord": "Strong editorial review and reference-quality coverage",
+        "knownFor": ["Encyclopedia entries", "Reference research", "Editorially reviewed summaries"],
+        "recommendedAlternatives": [
+            {"name": "Britannica", "url": "https://britannica.com", "reason": "Reference encyclopedia"},
+            {"name": "Reuters", "url": "https://reuters.com", "reason": "Current events verification"},
+            {"name": "AP News", "url": "https://apnews.com", "reason": "Fact-based reporting"},
+        ],
+    },
     "theguardian.com": {
         "credibilityScore": 78, "credibilityVerdict": "Generally Reliable",
         "editorialBias": "Left", "ownership": "Guardian Media Group",
@@ -999,20 +1021,10 @@ def get_site_credibility(domain: str) -> dict:
     if clean.startswith("www."):
         clean = clean[4:]
 
-    # Try exact match first
-    if clean in SITE_CREDIBILITY_DB:
-        data = SITE_CREDIBILITY_DB[clean]
-        return {
-            "domain": clean,
-            **data,
-        }
-
-    # Try suffix matching for subdomains
-    parts = clean.split(".")
-    if len(parts) >= 2:
-        base = ".".join(parts[-2:])
-        if base in SITE_CREDIBILITY_DB:
-            data = SITE_CREDIBILITY_DB[base]
+    # Match the longest known suffix so domains like bbc.co.uk or edition.cnn.com work better.
+    for known_domain in sorted(SITE_CREDIBILITY_DB.keys(), key=len, reverse=True):
+        if clean == known_domain or clean.endswith(f".{known_domain}"):
+            data = SITE_CREDIBILITY_DB[known_domain]
             return {
                 "domain": clean,
                 **data,
@@ -1041,16 +1053,211 @@ def _make_unknown_site_response(domain: str, reason: str) -> dict:
     }
 
 
+async def call_openai_json(prompt: str, schema_name: str, schema: dict) -> Optional[dict]:
+    """Call the OpenAI Responses API for structured JSON output."""
+    if not OPENAI_API_KEY:
+        return None
+
+    payload = {
+        "model": OPENAI_MODEL,
+        "input": [
+            {
+                "role": "system",
+                "content": [
+                    {
+                        "type": "input_text",
+                        "text": (
+                            "You are a careful fact-checking assistant. "
+                            "Return only valid JSON matching the schema."
+                        ),
+                    }
+                ],
+            },
+            {
+                "role": "user",
+                "content": [{"type": "input_text", "text": prompt}],
+            },
+        ],
+        "text": {
+            "format": {
+                "type": "json_schema",
+                "name": schema_name,
+                "strict": True,
+                "schema": schema,
+            }
+        },
+    }
+
+    headers = {
+        "Authorization": f"Bearer {OPENAI_API_KEY}",
+        "Content-Type": "application/json",
+    }
+
+    try:
+        async with httpx.AsyncClient(timeout=25.0) as client:
+            response = await client.post(
+                "https://api.openai.com/v1/responses",
+                headers=headers,
+                json=payload,
+            )
+            response.raise_for_status()
+            data = response.json()
+    except (httpx.HTTPError, ValueError):
+        return None
+
+    output_text = data.get("output_text")
+    if isinstance(output_text, str) and output_text.strip():
+        try:
+            return json.loads(output_text)
+        except ValueError:
+            pass
+
+    for item in data.get("output", []):
+        for content in item.get("content", []):
+            text_value = content.get("text")
+            if isinstance(text_value, str) and text_value.strip():
+                try:
+                    return json.loads(text_value)
+                except ValueError:
+                    continue
+
+    return None
+
+
+async def ai_detect_claims(text: str) -> Optional[list[dict]]:
+    """Use AI to extract concise checkable claims from page text."""
+    prompt = (
+        "Extract up to 5 concise, verifiable factual claims from the following web page text. "
+        "Only include claims that could realistically be fact-checked. "
+        "Ignore calls to action, navigation, and boilerplate.\n\n"
+        f"PAGE TEXT:\n{text[:12000]}"
+    )
+    schema = {
+        "type": "object",
+        "properties": {
+            "claims": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "claim": {"type": "string"},
+                    },
+                    "required": ["claim"],
+                    "additionalProperties": False,
+                },
+            }
+        },
+        "required": ["claims"],
+        "additionalProperties": False,
+    }
+    result = await call_openai_json(prompt, "detected_claims", schema)
+    if not result or not isinstance(result.get("claims"), list):
+        return None
+
+    cleaned_claims = []
+    for item in result["claims"][:5]:
+        claim = (item.get("claim") or "").strip()
+        if 20 <= len(claim) <= 320:
+            cleaned_claims.append({"claim": claim})
+    return cleaned_claims or None
+
+
+async def ai_site_credibility(
+    domain: str,
+    source_url: Optional[str],
+    page_title: Optional[str],
+    description: Optional[str],
+    page_text: Optional[str],
+    fallback: dict,
+) -> Optional[dict]:
+    """Use AI to assess website credibility from URL/page context."""
+    prompt = (
+        "Assess the credibility of this website/article source. "
+        "Use the page title, description, URL, article text excerpt, and the fallback baseline. "
+        "Return a conservative judgment. If evidence is weak, stay near the fallback. "
+        "Keep recommended alternatives short.\n\n"
+        f"DOMAIN: {domain}\n"
+        f"URL: {source_url or ''}\n"
+        f"TITLE: {page_title or ''}\n"
+        f"DESCRIPTION: {description or ''}\n"
+        f"PAGE EXCERPT: {(page_text or '')[:4000]}\n"
+        f"FALLBACK BASELINE: {json.dumps(fallback)}"
+    )
+    schema = {
+        "type": "object",
+        "properties": {
+            "credibilityScore": {"type": "integer"},
+            "credibilityVerdict": {"type": "string"},
+            "editorialBias": {"type": "string"},
+            "ownership": {"type": "string"},
+            "funding": {"type": "string"},
+            "transparencyScore": {"type": "integer"},
+            "factCheckTrackRecord": {"type": "string"},
+            "knownFor": {"type": "array", "items": {"type": "string"}},
+            "recommendedAlternatives": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "name": {"type": "string"},
+                        "url": {"type": "string"},
+                        "reason": {"type": "string"},
+                    },
+                    "required": ["name", "url", "reason"],
+                    "additionalProperties": False,
+                },
+            },
+        },
+        "required": [
+            "credibilityScore",
+            "credibilityVerdict",
+            "editorialBias",
+            "ownership",
+            "funding",
+            "transparencyScore",
+            "factCheckTrackRecord",
+            "knownFor",
+            "recommendedAlternatives",
+        ],
+        "additionalProperties": False,
+    }
+    result = await call_openai_json(prompt, "site_credibility", schema)
+    if not result:
+        return None
+
+    try:
+        return {
+            "domain": domain,
+            "credibilityScore": max(0, min(100, int(result["credibilityScore"]))),
+            "credibilityVerdict": str(result["credibilityVerdict"]).strip() or fallback["credibilityVerdict"],
+            "editorialBias": str(result["editorialBias"]).strip() or fallback["editorialBias"],
+            "ownership": str(result["ownership"]).strip() or fallback["ownership"],
+            "funding": str(result["funding"]).strip() or fallback["funding"],
+            "transparencyScore": max(0, min(100, int(result["transparencyScore"]))),
+            "factCheckTrackRecord": str(result["factCheckTrackRecord"]).strip() or fallback["factCheckTrackRecord"],
+            "knownFor": [str(item).strip() for item in result["knownFor"][:5] if str(item).strip()],
+            "recommendedAlternatives": result["recommendedAlternatives"][:3],
+        }
+    except (KeyError, TypeError, ValueError):
+        return None
+
+
 # ============================================
 # NEW ENDPOINTS
 # ============================================
 
 class SiteCredibilityRequest(BaseModel):
-    domain: str
+    domain: Optional[str] = None
+    source_url: Optional[str] = None
+    page_title: Optional[str] = None
+    page_description: Optional[str] = None
+    page_text: Optional[str] = None
 
 
 class SiteCredibilityResponse(BaseModel):
     domain: str
+    checkedUrl: Optional[str] = None
+    pageTitle: Optional[str] = None
     credibilityScore: int
     credibilityVerdict: str
     editorialBias: str
@@ -1065,8 +1272,37 @@ class SiteCredibilityResponse(BaseModel):
 @app.post("/site-credibility", response_model=SiteCredibilityResponse)
 async def site_credibility_endpoint(request: SiteCredibilityRequest):
     """Assess the credibility of a news website/domain using media bias research."""
-    result = get_site_credibility(request.domain)
-    return result
+    domain = request.domain
+    if request.source_url:
+        domain = extract_domain(request.source_url, request.source_url) or domain
+
+    result = get_site_credibility(domain or "")
+
+    checked_url = request.source_url
+    page_title = request.page_title
+    page_description = request.page_description
+    page_text = request.page_text
+    if request.source_url:
+        metadata = await fetch_article_metadata(request.source_url)
+        checked_url = metadata.get("url") or request.source_url
+        page_title = page_title or metadata.get("title") or None
+        page_description = page_description or metadata.get("description") or None
+
+    ai_result = await ai_site_credibility(
+        domain=result["domain"],
+        source_url=checked_url,
+        page_title=page_title,
+        description=page_description,
+        page_text=page_text,
+        fallback=result,
+    )
+    final_result = ai_result or result
+
+    return {
+        **final_result,
+        "checkedUrl": checked_url,
+        "pageTitle": page_title,
+    }
 
 
 @app.post("/api/detect-claims")
@@ -1077,42 +1313,69 @@ async def detect_claims(request: dict):
     if not text or len(text.strip()) < 50:
         return {"success": True, "data": {"claims": [], "message": "Text too short"}}
 
-    # Simple claim extraction - split by sentences and filter for claim-like statements
-    import re
-    sentences = re.split(r'[.!?]+', text)
-    claims = []
+    ai_claims = await ai_detect_claims(text)
+    if ai_claims:
+        return {"success": True, "data": {"claims": ai_claims, "method": "ai"}}
 
-    for sent in sentences:
-        sent = sent.strip()
-        if len(sent) < 30:
+    normalized_text = re.sub(r"\s+", " ", text).strip()
+    raw_segments = re.split(r"(?<=[.!?])\s+|\n+", normalized_text)
+    candidates = []
+
+    for segment in raw_segments:
+        sent = segment.strip(" -\t\r\n")
+        lowered = sent.lower()
+
+        if len(sent) < 25 or len(sent) > 320:
             continue
-        if len(sent) > 300:
+        if sent.endswith("?"):
+            continue
+        if any(
+            lowered.startswith(x)
+            for x in [
+                "click here", "sign up", "subscribe", "follow us", "visit",
+                "call", "share this", "advertisement", "cookie", "privacy policy",
+            ]
+        ):
             continue
 
-        # Filter out questions, commands, and statement phrases
-        if sent.startswith("?") or sent.startswith("!"):
-            continue
-        if any(sent.lower().startswith(x) for x in ["click here", "sign up", "subscribe", "follow us", "visit", "call"]):
-            continue
+        score = 0
+        if re.search(r"\b\d+(\.\d+)?%?\b", sent):
+            score += 2
+        if any(
+            token in lowered
+            for token in [
+                "according to", "reported", "reports", "claimed", "claims",
+                "study", "research", "experts", "announced", "confirmed",
+                "found", "shows", "data", "evidence", "officials",
+            ]
+        ):
+            score += 2
+        if any(verb in lowered for verb in [" is ", " are ", " was ", " were ", " has ", " have ", " will "]):
+            score += 1
+        if 30 <= len(sent) <= 180:
+            score += 1
+        if sent.count(",") >= 1:
+            score += 1
 
-        # Look for claim-like indicators: numbers, statistics, specific claims
-        has_indicator = any(x in sent.lower() for x in [
-            " percent", "%", " study", " research", " according to", " experts",
-            " found ", " discovered", " announced", " reported", " confirmed",
-            " believe ", " claim ", " says ", " according to the ",
-        ])
+        if score >= 2:
+            candidates.append({"claim": sent, "score": score})
 
-        if has_indicator or len(sent) < 150:
-            claims.append({"claim": sent.strip()})
+    if not candidates:
+        fallback_segments = [
+            {"claim": seg.strip(" -\t\r\n"), "score": 1}
+            for seg in raw_segments
+            if 30 <= len(seg.strip()) <= 180 and not seg.strip().endswith("?")
+        ]
+        candidates = fallback_segments[:5]
 
     # Deduplicate
     seen = set()
     unique_claims = []
-    for c in claims:
+    for c in sorted(candidates, key=lambda item: (-item["score"], len(item["claim"]))):
         norm = c["claim"].lower()[:50]
         if norm not in seen:
             seen.add(norm)
-            unique_claims.append(c)
+            unique_claims.append({"claim": c["claim"]})
 
     return {"success": True, "data": {"claims": unique_claims[:10]}}
 

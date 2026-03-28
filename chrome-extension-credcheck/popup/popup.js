@@ -361,23 +361,34 @@ async function handleScanPage() {
   els.claimResultSection.style.display = 'none';
 
   try {
-    // Get current tab
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    currentDomain = extractDomain(tab.url);
-    currentPageUrl = isHttpUrl(tab.url) ? tab.url : null;
-    els.scanDomain.textContent = currentDomain || tab.url;
+    const pageInfo = await getPageInfo();
+    currentDomain = pageInfo.domain;
+    currentPageUrl = pageInfo.url;
+    els.scanDomain.textContent = currentDomain || pageInfo.url || 'Unsupported page';
 
-    // Extract page content
-    const results = await chrome.scripting.executeScript({
-      target: { tabId: tab.id },
-      func: extractPageText,
-    });
+    if (!currentPageUrl) {
+      els.scanningSection.style.display = 'none';
+      displayScanEmptyState('This page type cannot be scanned. Open a regular website article and try again.');
+      return;
+    }
 
-    const pageText = results[0]?.result || '';
+    const pageText = pageInfo.text || '';
+    const pageTitle = pageInfo.title || '';
+    const pageDescription = pageInfo.description || '';
 
     if (!pageText || pageText.length < 50) {
       els.scanningSection.style.display = 'none';
-      els.scanEmptyState.style.display = 'block';
+      if (pageTitle.length >= 20 || pageDescription.length >= 30) {
+        displayDetectedClaims(
+          [pageTitle, pageDescription]
+            .filter(Boolean)
+            .filter(item => item.length >= 20)
+            .slice(0, 2)
+            .map(claim => ({ claim }))
+        );
+      } else {
+        displayScanEmptyState('We could not extract enough readable article text from this page.');
+      }
       return;
     }
 
@@ -388,12 +399,20 @@ async function handleScanPage() {
 
     if (detectResult.data && detectResult.data.claims && detectResult.data.claims.length > 0) {
       displayDetectedClaims(detectResult.data.claims.slice(0, 3));
+    } else if (pageTitle.length >= 20 || pageDescription.length >= 30) {
+      displayDetectedClaims(
+        [pageTitle, pageDescription]
+          .filter(Boolean)
+          .filter(item => item.length >= 20)
+          .slice(0, 2)
+          .map(claim => ({ claim }))
+      );
     } else {
-      els.scanEmptyState.style.display = 'block';
+      displayScanEmptyState('No strong checkable claims were found on this page.');
     }
   } catch (err) {
     els.scanningSection.style.display = 'none';
-    displayError('Failed to scan page. Try again.');
+    displayScanEmptyState(err.message || 'Failed to scan page. Try again.');
   }
 }
 
@@ -416,6 +435,16 @@ function extractPageText() {
     .slice(0, 30);
 
   return paragraphs.join('\n\n');
+}
+
+function displayScanEmptyState(message) {
+  els.claimsSection.style.display = 'none';
+  els.claimResultSection.style.display = 'none';
+  els.scanEmptyState.style.display = 'block';
+  const desc = els.scanEmptyState.querySelector('.empty-desc');
+  if (desc) {
+    desc.textContent = message;
+  }
 }
 
 function displayDetectedClaims(claims) {
@@ -508,11 +537,15 @@ async function handleSiteCredibility() {
   els.siteResultSection.style.display = 'none';
 
   try {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    const domain = extractDomain(tab.url) || 'unknown';
+    const pageInfo = await getPageInfo();
+    const domain = pageInfo.domain;
+
+    if (!domain) {
+      throw new Error('This page does not have a supported website domain to check.');
+    }
 
     currentDomain = domain;
-    currentPageUrl = isHttpUrl(tab.url) ? tab.url : null;
+    currentPageUrl = pageInfo.url;
     els.siteDomainLabel.textContent = domain;
     els.siteFavicon.src = `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
 
@@ -526,17 +559,24 @@ async function handleSiteCredibility() {
       return;
     }
 
-    const result = await callAPI('/site-credibility', { domain });
-    cachedSiteData = result.data;
+    const result = await callAPI('/site-credibility', {
+      domain,
+      source_url: currentPageUrl,
+      page_title: pageInfo.title || '',
+      page_description: pageInfo.description || '',
+      page_text: pageInfo.text || '',
+    });
+    const siteData = result?.data || result;
+    cachedSiteData = siteData;
 
     // Cache it
     siteCache[domain] = {
-      data: result.data,
+      data: siteData,
       timestamp: Date.now(),
     };
     await chrome.storage.local.set({ siteCache });
 
-    displaySiteResult(result.data, null);
+    displaySiteResult(siteData, null);
   } catch (err) {
     els.siteLoading.style.display = 'none';
     displaySiteError(err.message || 'Failed to check site credibility.');
@@ -670,6 +710,7 @@ function displaySiteResult(data, cachedTimestamp) {
 }
 
 function displaySiteError(msg) {
+  els.siteLoading.style.display = 'none';
   els.siteResultSection.style.display = 'flex';
   els.siteResultSection.innerHTML = `
     <div class="error-state">
@@ -773,6 +814,49 @@ async function getActivePageContext() {
     };
   } catch (_err) {
     return { url: null, domain: null, title: '' };
+  }
+}
+
+async function getPageInfo() {
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  const fallback = {
+    url: isHttpUrl(tab?.url) ? tab.url : null,
+    domain: extractDomain(tab?.url),
+    title: tab?.title || '',
+    text: '',
+  };
+
+  if (!tab?.id || !fallback.url) {
+    return fallback;
+  }
+
+  try {
+    const response = await chrome.tabs.sendMessage(tab.id, { type: 'GET_PAGE_INFO' });
+    if (response && typeof response === 'object') {
+      return {
+        url: response.url || fallback.url,
+        domain: response.domain || fallback.domain,
+        title: response.title || fallback.title,
+        description: response.description || '',
+        text: response.text || '',
+      };
+    }
+  } catch (_err) {
+    // Fall through to executeScript fallback below.
+  }
+
+  try {
+    const results = await chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      func: extractPageText,
+    });
+    return {
+      ...fallback,
+      description: '',
+      text: results[0]?.result || '',
+    };
+  } catch (_err) {
+    return { ...fallback, description: '' };
   }
 }
 

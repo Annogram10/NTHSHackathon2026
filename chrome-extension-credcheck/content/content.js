@@ -17,8 +17,9 @@
     } else if (request.type === 'GET_PAGE_INFO') {
       sendResponse({
         title: document.title,
-        url: window.location.href,
+        url: getBestPageUrl(),
         domain: window.location.hostname.replace('www.', ''),
+        description: getMetaDescription(),
         text: extractReadableText(),
       });
     } else if (request.type === 'GET_SELECTION') {
@@ -74,10 +75,36 @@
   function extractPageContent() {
     return {
       title: document.title,
-      url: window.location.href,
+      url: getBestPageUrl(),
       domain: window.location.hostname.replace('www.', ''),
+      description: getMetaDescription(),
       text: extractReadableText(),
     };
+  }
+
+  function getMetaDescription() {
+    const meta =
+      document.querySelector('meta[name="description"]') ||
+      document.querySelector('meta[property="og:description"]') ||
+      document.querySelector('meta[name="twitter:description"]');
+
+    return meta?.getAttribute('content')?.trim() || '';
+  }
+
+  function getBestPageUrl() {
+    const canonical =
+      document.querySelector('link[rel="canonical"]')?.getAttribute('href') ||
+      document.querySelector('meta[property="og:url"]')?.getAttribute('content');
+
+    if (canonical) {
+      try {
+        return new URL(canonical, window.location.href).toString();
+      } catch {
+        return canonical;
+      }
+    }
+
+    return window.location.href;
   }
 
   // Notify background that content script is ready
