@@ -236,6 +236,63 @@ async def search_guardian(query: str, limit: int) -> list[dict[str, Any]]:
     return results
 
 
+async def search_britannica(query: str, limit: int) -> list[dict[str, Any]]:
+    """Search Britannica's public site search as a trusted reference source."""
+    headers = {"User-Agent": USER_AGENT}
+    try:
+        async with httpx.AsyncClient(timeout=DEFAULT_TIMEOUT, follow_redirects=True) as client:
+            response = await client.get(
+                "https://www.britannica.com/search",
+                params={"query": query},
+                headers=headers,
+            )
+            response.raise_for_status()
+            html = response.text
+    except httpx.HTTPError:
+        return []
+
+    matches = re.findall(
+        r'<a[^>]+href="(/[^"]+)"[^>]*>(.*?)</a>',
+        html,
+        flags=re.IGNORECASE | re.DOTALL,
+    )
+
+    results: list[dict[str, Any]] = []
+    seen_urls: set[str] = set()
+    for path, raw_title in matches:
+        if not path.startswith("/"):
+            continue
+        if any(
+            blocked in path
+            for blocked in ["/dictionary/", "/quiz/", "/video/", "/browse/"]
+        ):
+            continue
+
+        title = _clean_text(raw_title)
+        if len(title) < 4:
+            continue
+
+        url = f"https://www.britannica.com{path}"
+        if url in seen_urls:
+            continue
+        seen_urls.add(url)
+
+        results.append(
+            _provider_result(
+                title=title,
+                summary=f"Britannica reference result for {title}.",
+                url=url,
+                source_name="Britannica",
+                provider_reliability="high",
+            )
+        )
+
+        if len(results) >= limit:
+            break
+
+    return results
+
+
 async def search_google_fact_check(query: str, limit: int) -> list[dict[str, Any]]:
     api_key = os.getenv("GOOGLE_FACT_CHECK_API_KEY")
     if not api_key:
@@ -380,6 +437,7 @@ PROVIDER_SEARCHES = [
     ("NewsAPI", search_newsapi),
     ("GNews", search_gnews),
     ("The Guardian", search_guardian),
+    ("Britannica", search_britannica),
     ("Google Fact Check", search_google_fact_check),
     ("MediaStack", search_mediastack),
     ("Newscatcher", search_newscatcher),

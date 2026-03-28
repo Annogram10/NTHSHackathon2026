@@ -3,114 +3,171 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CredCheck</title>
+  <title>Vouch</title>
   <link rel="stylesheet" href="popup.css">
 </head>
 <body>
-  <div class="container">
-    <!-- Header -->
-    <header class="header">
-      <div class="logo">
-        <svg class="logo-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Header -->
+  <header class="popup-header">
+    <div class="header-gradient"></div>
+    <div class="header-content">
+      <div class="header-left">
+        <svg class="logo-icon" viewBox="0 0 24 24" fill="none">
           <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-        <span class="logo-text">CredCheck</span>
+        <span class="logo-text">Vouch</span>
       </div>
-      <p class="tagline">Real-time Credibility Analysis</p>
-    </header>
-
-    <!-- Input Section -->
-    <section class="input-section" id="inputSection">
-      <textarea
-        id="claimInput"
-        class="claim-input"
-        placeholder="Paste content to verify credibility..."
-        rows="4"
-      ></textarea>
-      <div class="input-actions">
-        <button id="extractBtn" class="btn btn-secondary">
+      <div class="header-right">
+        <div class="vouch-score-badge" id="vouchScoreBadge">
+          <span class="score-label">Vouch Score</span>
+          <span class="score-value" id="vouchScore">0</span>
+        </div>
+        <button class="settings-btn" id="settingsBtn" title="Settings">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-            <polyline points="14 2 14 8 20 8"/>
-          </svg>
-          Extract Page
-        </button>
-        <button id="analyzeBtn" class="btn btn-primary">Check Credibility</button>
-      </div>
-    </section>
-
-    <!-- Loading Section -->
-    <section class="loading-section" id="loadingSection" style="display: none;">
-      <div class="loading-spinner"></div>
-      <p class="loading-text">Analyzing credibility...</p>
-      <p class="loading-subtext">Cross-referencing sources</p>
-    </section>
-
-    <!-- Result Section -->
-    <section class="result-section" id="resultSection" style="display: none;">
-      <div class="credibility-meter">
-        <div class="meter-header">
-          <span class="meter-label">Credibility Score</span>
-          <span id="credibilityScore" class="meter-value">0</span>
-        </div>
-        <div class="meter-track">
-          <div id="meterFill" class="meter-fill"></div>
-        </div>
-        <div class="meter-scale">
-          <span>Low</span>
-          <span>Medium</span>
-          <span>High</span>
-        </div>
-      </div>
-
-      <div class="verdict-card" id="verdictCard">
-        <div id="verdictIcon" class="verdict-icon"></div>
-        <div class="verdict-content">
-          <h3 id="verdictTitle" class="verdict-title">Verdict</h3>
-          <p id="verdictDescription" class="verdict-description"></p>
-        </div>
-      </div>
-
-      <div class="card">
-        <h3 class="card-title">Assessment</h3>
-        <p id="assessment" class="card-text"></p>
-      </div>
-
-      <div class="card card-warning" id="issuesCard" style="display: none;">
-        <h3 class="card-title">Credibility Issues</h3>
-        <ul id="issuesList" class="issues-list"></ul>
-      </div>
-
-      <div class="sources-section">
-        <h3 class="section-title">Supporting Sources</h3>
-        <div id="sourcesList" class="sources-list"></div>
-      </div>
-
-      <div class="result-actions">
-        <button id="newAnalysisBtn" class="btn btn-secondary">Check Another</button>
-        <button id="shareBtn" class="btn btn-icon" title="Share result">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/>
-            <polyline points="16 6 12 2 8 6"/>
-            <line x1="12" y1="2" x2="12" y2="15"/>
+            <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+            <circle cx="12" cy="12" r="3"/>
           </svg>
         </button>
       </div>
-    </section>
+    </div>
+  </header>
 
-    <!-- History Section -->
-    <section class="history-section" id="historySection">
-      <h3 class="section-title">Recent Checks</h3>
-      <div id="historyList" class="history-list"></div>
-    </section>
+  <!-- Tab Bar -->
+  <nav class="tab-bar">
+    <button class="tab-btn active" data-tab="paste">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+      </svg>
+      <span>Paste &amp; Analyze</span>
+    </button>
+    <button class="tab-btn" data-tab="scan">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+      </svg>
+      <span>Scan Page</span>
+    </button>
+    <button class="tab-btn" data-tab="site">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
+      </svg>
+      <span>Site Credibility</span>
+    </button>
+  </nav>
 
-    <!-- Footer -->
-    <footer class="footer">
-      <a href="#" id="openDashboard">Dashboard</a>
-      <span class="separator">•</span>
-      <a href="#" id="settingsLink">Settings</a>
-    </footer>
+  <!-- Tab Content -->
+  <div class="tab-content">
+
+    <!-- Tab 1: Paste & Analyze -->
+    <div class="tab-panel active" id="tab-paste">
+      <div class="input-section">
+        <div class="source-pill-row">
+          <span class="source-pill-label">Full source network</span>
+          <span class="source-pill">Google Fact Check</span>
+          <span class="source-pill">NewsAPI</span>
+          <span class="source-pill">GNews</span>
+          <span class="source-pill">Guardian</span>
+        </div>
+        <textarea
+          id="claimInput"
+          class="claim-input"
+          placeholder="Paste any claim, headline, or text to Vouch it..."
+          rows="4"
+        ></textarea>
+        <div class="input-actions">
+          <button id="analyzeBtn" class="btn btn-primary btn-full">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Vouch It
+          </button>
+        </div>
+      </div>
+
+      <!-- Loading -->
+      <div class="loading-section" id="pasteLoading" style="display: none;">
+        <div class="loading-pulse"></div>
+        <p class="loading-text">Analyzing claim...</p>
+        <p class="loading-subtext">Cross-referencing the full source database</p>
+      </div>
+
+      <!-- Result -->
+      <div class="result-section" id="pasteResult" style="display: none;"></div>
+    </div>
+
+    <!-- Tab 2: Scan Page -->
+    <div class="tab-panel" id="tab-scan">
+      <div class="scan-header">
+        <div class="scan-info">
+          <span class="scan-domain" id="scanDomain">Current page</span>
+          <button class="btn btn-secondary btn-sm" id="rescanBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+            </svg>
+            Re-scan
+          </button>
+        </div>
+      </div>
+
+      <!-- Scanning -->
+      <div class="scanning-section" id="scanningSection">
+        <div class="scanning-pulse"></div>
+        <p class="scanning-text">Scanning page for claims...</p>
+        <p class="scanning-subtext">Using page URL and visible text for full-source verification</p>
+      </div>
+
+      <!-- Detected Claims -->
+      <div class="claims-section" id="claimsSection" style="display: none;"></div>
+
+      <!-- Empty State -->
+      <div class="empty-state" id="scanEmptyState" style="display: none;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+        <p class="empty-title">No checkable claims found</p>
+        <p class="empty-desc">This page doesn't contain any claims that can be verified.</p>
+      </div>
+
+      <!-- Claim Result -->
+      <div class="claim-result-section" id="claimResultSection" style="display: none;"></div>
+    </div>
+
+    <!-- Tab 3: Site Credibility -->
+    <div class="tab-panel" id="tab-site">
+      <div class="site-header" id="siteHeader">
+        <div class="site-domain-info">
+          <img class="site-favicon" id="siteFavicon" src="" alt="">
+          <div>
+            <span class="site-label">Analyzing</span>
+            <span class="site-domain" id="siteDomainLabel">...</span>
+          </div>
+        </div>
+        <button class="btn btn-secondary btn-sm" id="refreshSiteBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+          </svg>
+          Refresh
+        </button>
+      </div>
+
+      <!-- Site Loading -->
+      <div class="loading-section" id="siteLoading" style="display: none;">
+        <div class="loading-pulse"></div>
+        <p class="loading-text">Checking site credibility...</p>
+        <p class="loading-subtext">Looking up domain reputation</p>
+      </div>
+
+      <!-- Site Result -->
+      <div class="site-result-section" id="siteResultSection" style="display: none;"></div>
+    </div>
+
   </div>
+
+  <!-- Footer -->
+  <footer class="popup-footer">
+    <span class="footer-text">Vouch Extension</span>
+    <span class="footer-sep">·</span>
+    <span class="footer-text" id="historyCount">0 analyses</span>
+  </footer>
 
   <script src="popup.js" type="module"></script>
 </body>

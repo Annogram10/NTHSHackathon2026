@@ -89,12 +89,14 @@ function normalizeBias(bias?: string): AnalysisResult["bias"] {
 function getCredibilityScore(reliability: string, publisher: string): number {
   const sourceName = publisher.toLowerCase();
 
-  if (sourceName.includes("britannica")) {
-    return 97;
-  }
-
-  if (sourceName.includes("wikipedia")) {
-    return 90;
+  if (
+    sourceName.includes("google fact check") ||
+    sourceName.includes("reuters") ||
+    sourceName.includes("associated press") ||
+    sourceName.includes("ap news") ||
+    sourceName.includes("guardian")
+  ) {
+    return 95;
   }
 
   if (reliability === "high") {

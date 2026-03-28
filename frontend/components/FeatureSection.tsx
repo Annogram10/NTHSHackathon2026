@@ -19,7 +19,7 @@ const features = [
     ),
     title: "Multi-Source Verification",
     description:
-      "Cross-references claims against research-style reference sources, including Wikipedia and Britannica, to identify agreement and contradictions.",
+      "Cross-references claims against connected fact-check and news providers to identify agreement and contradictions.",
     color: "blue",
   },
   {

@@ -1,7 +1,6 @@
 "use client";
 
 import { createContext, useContext, useMemo, useState, useCallback } from "react";
-
 export const MAX_FREE_DEMO_USES = 3;
 
 type AuthContextType = {
@@ -30,7 +29,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [username, setUsername] = useState<string | null>(null);
   const [demoUses, setDemoUses] = useState<number>(0);
-
 
   const canUseDemo = isLoggedIn || demoUses < MAX_FREE_DEMO_USES;
 

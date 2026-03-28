@@ -30,7 +30,7 @@ const steps = [
     number: 2,
     title: "Search Sources",
     description:
-      "We look for relevant material in sources like Wikipedia and Britannica, then compare the claim with the evidence.",
+      "We look for relevant material across connected fact-check and news providers, then compare the claim with the evidence.",
     icon: (
       <svg
         className="w-5 h-5"
