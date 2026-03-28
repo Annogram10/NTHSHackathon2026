@@ -1,4 +1,4 @@
-import { AnalysisResult, HistoryItem } from "@/types/facticity";
+import { AnalysisResult, HistoryItem } from "@/types/vouch";
 
 export const mockAnalysisResult: AnalysisResult = {
   id: "result-001",

@@ -1,4 +1,4 @@
-# Facticity Backend - Team Workflow Plan
+# Vouch Backend - Team Workflow Plan
 
 ## Overview
 3 backend developers working on FastAPI backend for AI-powered fact-checking.

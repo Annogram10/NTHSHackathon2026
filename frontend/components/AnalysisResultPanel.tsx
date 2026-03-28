@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { AnalysisResult, Verdict } from "@/types/facticity";
+import { AnalysisResult, Verdict } from "@/types/vouch";
 import { VerdictBadge } from "./VerdictBadge";
 import { TrustScoreCard } from "./TrustScoreCard";
 import { SourceCard } from "./SourceCard";
@@ -200,7 +200,7 @@ export function AnalysisResultPanel({ result }: AnalysisResultPanelProps) {
 
   const handleShare = async () => {
     const shareData = {
-      title: "Facticity fact check",
+      title: "Vouch fact check",
       text: `${result.claim}\n\nVerdict: ${result.verdict}\nTrust score: ${result.trustScore}`,
     };
 

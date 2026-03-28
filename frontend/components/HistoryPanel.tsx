@@ -1,6 +1,6 @@
 "use client";
 
-import { HistoryItem } from "@/types/facticity";
+import { HistoryItem } from "@/types/vouch";
 import { VerdictBadge } from "./VerdictBadge";
 
 interface HistoryPanelProps {

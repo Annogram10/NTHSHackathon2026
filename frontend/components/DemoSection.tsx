@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { AnalysisResult, HistoryItem } from "@/types/facticity";
+import { AnalysisResult, HistoryItem } from "@/types/vouch";
 import { analyzeClaim, AnalysisInput, getHistory } from "@/lib/analysisService";
 import { DemoInput } from "./DemoInput";
 import { AnalysisResultPanel } from "./AnalysisResultPanel";
@@ -96,7 +96,7 @@ export function DemoSection({ checkerOnly = false }: { checkerOnly?: boolean }) 
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
-            {checkerOnly ? "Fact Checker" : "Check with Facticity"}
+            {checkerOnly ? "Fact Checker" : "Check with Vouch"}
           </h2>
           <p className="mt-4 text-lg text-white/90">
             Check a claim against trusted sources and review the evidence behind the verdict

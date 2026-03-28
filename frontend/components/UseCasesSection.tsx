@@ -126,7 +126,7 @@ export function UseCasesSection() {
             Use cases
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-white/90">
-            Facticity works best anywhere a fast reference-source check would help
+            Vouch works best anywhere a fast reference-source check would help
           </p>
         </div>
 

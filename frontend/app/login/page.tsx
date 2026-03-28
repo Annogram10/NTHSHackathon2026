@@ -50,7 +50,7 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(120,74,255,0.16)_0%,_rgba(120,74,255,0.08)_16%,_rgba(18,18,24,0.92)_42%,_#0b0b0f_72%),linear-gradient(180deg,_#13131a_0%,_#0f1015_28%,_#0c0c11_55%,_#09090c_100%)] px-4 py-16 text-white sm:px-6 lg:px-8">
+    <main className="flex min-h-screen items-center justify-center px-4 py-16 text-white sm:px-6 lg:px-8">
       <div className="w-full max-w-md rounded-2xl border border-violet-900/30 bg-zinc-950/72 p-8 shadow-xl shadow-violet-950/30 backdrop-blur-md">
         <h1 className="text-2xl font-bold mb-4">Login</h1>
         <p className="mb-5 text-sm text-zinc-300">

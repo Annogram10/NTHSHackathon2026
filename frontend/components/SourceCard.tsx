@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Source } from "@/types/facticity";
+import { Source } from "@/types/vouch";
 
 interface SourceCardProps {
   source: Source;

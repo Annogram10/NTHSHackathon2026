@@ -9,7 +9,7 @@ export default function HomePageClient() {
   const { isLoggedIn, username, logout } = useAuth();
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(120,74,255,0.16)_0%,_rgba(120,74,255,0.08)_16%,_rgba(18,18,24,0.92)_42%,_#0b0b0f_72%),linear-gradient(180deg,_#13131a_0%,_#0f1015_28%,_#0c0c11_55%,_#09090c_100%)] text-zinc-100">
+    <div className="min-h-screen text-zinc-100">
       <header className="relative">
         <nav className="fixed top-0 left-0 right-0 z-50 border-b border-zinc-800/80 bg-[#09090c]/65 backdrop-blur-xl">
           <div className="max-w-6xl mx-auto px-4 sm:px-6">
@@ -19,7 +19,7 @@ export default function HomePageClient() {
                   <div className="absolute inset-0 rounded-full bg-violet-600" />
                   <div className="absolute inset-0.5 bg-white rounded-full opacity-90" />
                 </div>
-                <span className="text-lg font-bold text-zinc-100">Facticity</span>
+                <span className="text-lg font-bold text-zinc-100">Vouch</span>
               </div>
               <div className="hidden sm:flex items-center gap-6">
                 {isLoggedIn ? (
@@ -99,7 +99,7 @@ export default function HomePageClient() {
                   <div className="absolute inset-0 rounded-full bg-violet-600" />
                   <div className="absolute inset-0.5 bg-white rounded-full opacity-90" />
                 </div>
-                <span className="text-sm font-bold text-zinc-100">Facticity</span>
+                <span className="text-sm font-bold text-zinc-100">Vouch</span>
               </div>
               <p className="text-sm text-zinc-200">
                 Source-backed fact checking for the internet, built to keep the evidence visible.

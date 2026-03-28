@@ -1,6 +1,6 @@
 "use client";
 
-import { Verdict } from "@/types/facticity";
+import { Verdict } from "@/types/vouch";
 
 interface VerdictBadgeProps {
   verdict: Verdict;

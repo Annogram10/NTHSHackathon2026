@@ -1,4 +1,4 @@
-import { AnalysisResult, HistoryItem } from "@/types/facticity";
+import { AnalysisResult, HistoryItem } from "@/types/vouch";
 
 export interface AnalysisInput {
   claim?: string;

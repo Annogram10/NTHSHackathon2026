@@ -22,7 +22,7 @@ export function HeroSection() {
             <div className="absolute inset-1 bg-white rounded-full opacity-90" />
           </div>
           <span className="text-sm font-semibold text-blue-700 dark:text-blue-400">
-            Facticity
+            Vouch
           </span>
           <span className="text-xs text-blue-600/70 dark:text-blue-400/50 font-medium">
             AI Trust Layer
@@ -40,7 +40,7 @@ export function HeroSection() {
 
         {/* Subheadline */}
         <p className="mt-6 text-lg sm:text-xl text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto leading-relaxed">
-          Facticity is an AI-powered trust layer that analyzes any claim, headline,
+          Vouch is an AI-powered trust layer that analyzes any claim, headline,
           or statement and delivers transparent, source-backed truth scores.
         </p>
 

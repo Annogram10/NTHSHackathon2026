@@ -26,7 +26,7 @@ const highlightPills = [
 ] as const;
 
 const heroStats: { label: string; value: string }[] = [
-  { label: "Reference sources", value: "2+" },
+  { label: "Reference sources", value: "8" },
   { label: "Website signals", value: "URL + byline" },
   { label: "Checks run", value: "Live demo" },
 ];
@@ -311,7 +311,7 @@ export function GlowyWavesHero() {
             className="mb-6 inline-flex items-center gap-2 rounded-full border border-zinc-700 bg-zinc-950/65 px-4 py-2 text-xs font-semibold uppercase tracking-[0.25em] text-white"
           >
             <Sparkles className="h-4 w-4 text-purple-400/80" aria-hidden="true" />
-            Facticity live verifier
+            Vouch live verifier
           </motion.div>
 
           <motion.h1
@@ -328,7 +328,7 @@ export function GlowyWavesHero() {
             variants={itemVariants}
             className="mx-auto mb-10 max-w-3xl text-lg text-white/90 md:text-2xl"
           >
-            Paste a URL or type a claim. Facticity benchmarks the statement
+            Paste a URL or type a claim. Vouch benchmarks the statement
             against connected fact-check and news sources, then blends that
             with domain and article-level credibility signals.
           </motion.p>
