@@ -17,6 +17,7 @@ export function DemoSection({ checkerOnly = false }: { checkerOnly?: boolean }) 
   const [isTransitioning, setIsTransitioning] = useState(false);
   const { isLoggedIn, username, demoUses, canUseDemo, incrementDemoUsage, logout } = useAuth();
   const [error, setError] = useState<string | null>(null);
+  const isDemoLocked = !isLoggedIn && demoUses >= MAX_FREE_DEMO_USES;
 
   useEffect(() => {
     const loadHistory = async () => {
@@ -161,42 +162,69 @@ export function DemoSection({ checkerOnly = false }: { checkerOnly?: boolean }) 
             {/* Input */}
             <DemoInput onSubmit={handleAnalyze} isLoading={isLoading} isLoggedIn={isLoggedIn} />
 
-            {/* Results */}
-            <div
-              className={`transition-all duration-300 ${
-                isTransitioning
-                  ? "opacity-0 translate-y-4"
-                  : "opacity-100 translate-y-0"
-              }`}
-            >
-              {result && !isLoading && (
-                <AnalysisResultPanel result={result} />
+            <div className="relative">
+              <div
+                className={`space-y-6 transition-all duration-300 ${
+                  isTransitioning
+                    ? "opacity-0 translate-y-4"
+                    : "opacity-100 translate-y-0"
+                } ${isDemoLocked ? "pointer-events-none select-none blur-[6px] opacity-45" : ""}`}
+              >
+                {/* Results */}
+                {result && !isLoading && (
+                  <AnalysisResultPanel result={result} />
+                )}
+
+                {error && !isLoading && (
+                  <div className="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-200">
+                    {error}
+                  </div>
+                )}
+
+                {/* Loading skeleton */}
+                {isLoading && (
+                  <div className="animate-pulse space-y-4">
+                    <div className="h-48 bg-zinc-200 dark:bg-zinc-800 rounded-2xl" />
+                    <div className="h-32 bg-zinc-200 dark:bg-zinc-800 rounded-2xl" />
+                  </div>
+                )}
+              </div>
+
+              {isDemoLocked && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="max-w-md rounded-2xl border border-purple-800/50 bg-zinc-950/90 p-6 text-center shadow-2xl backdrop-blur-md">
+                    <h3 className="text-lg font-semibold text-white">
+                      Free limit reached
+                    </h3>
+                    <p className="mt-2 text-sm leading-relaxed text-zinc-200">
+                      Log in to remove the blur, unlock the full analysis view, and keep checking with unlimited access.
+                    </p>
+                    <Link
+                      href="/login"
+                      className="mt-4 inline-flex rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-700"
+                    >
+                      Log in to continue
+                    </Link>
+                  </div>
+                </div>
               )}
             </div>
-
-            {error && !isLoading && (
-              <div className="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-200">
-                {error}
-              </div>
-            )}
-
-            {/* Loading skeleton */}
-            {isLoading && (
-              <div className="animate-pulse space-y-4">
-                <div className="h-48 bg-zinc-200 dark:bg-zinc-800 rounded-2xl" />
-                <div className="h-32 bg-zinc-200 dark:bg-zinc-800 rounded-2xl" />
-              </div>
-            )}
           </div>
 
           {/* Sidebar */}
           <div className="lg:col-span-1">
-            <div className="sticky top-6">
-              <HistoryPanel
-                items={history}
-                onSelect={handleHistorySelect}
-                isLoading={isHistoryLoading}
-              />
+            <div className="sticky top-6 relative">
+              <div className={isDemoLocked ? "pointer-events-none select-none blur-[6px] opacity-45" : ""}>
+                <HistoryPanel
+                  items={history}
+                  onSelect={handleHistorySelect}
+                  isLoading={isHistoryLoading}
+                />
+              </div>
+
+              {isDemoLocked && (
+                <div className="absolute inset-0 rounded-2xl border border-purple-900/40 bg-zinc-950/45" />
+              )}
             </div>
           </div>
         </div>

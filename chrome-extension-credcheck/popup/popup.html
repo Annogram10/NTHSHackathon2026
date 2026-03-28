@@ -60,6 +60,13 @@
     <!-- Tab 1: Paste & Analyze -->
     <div class="tab-panel active" id="tab-paste">
       <div class="input-section">
+        <div class="source-pill-row">
+          <span class="source-pill-label">Full source network</span>
+          <span class="source-pill">Google Fact Check</span>
+          <span class="source-pill">NewsAPI</span>
+          <span class="source-pill">GNews</span>
+          <span class="source-pill">Guardian</span>
+        </div>
         <textarea
           id="claimInput"
           class="claim-input"
@@ -80,7 +87,7 @@
       <div class="loading-section" id="pasteLoading" style="display: none;">
         <div class="loading-pulse"></div>
         <p class="loading-text">Analyzing claim...</p>
-        <p class="loading-subtext">Cross-referencing sources</p>
+        <p class="loading-subtext">Cross-referencing the full source database</p>
       </div>
 
       <!-- Result -->
@@ -105,7 +112,7 @@
       <div class="scanning-section" id="scanningSection">
         <div class="scanning-pulse"></div>
         <p class="scanning-text">Scanning page for claims...</p>
-        <p class="scanning-subtext">Extracting visible text</p>
+        <p class="scanning-subtext">Using page URL and visible text for full-source verification</p>
       </div>
 
       <!-- Detected Claims -->
