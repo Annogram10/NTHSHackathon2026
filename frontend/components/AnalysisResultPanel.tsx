@@ -124,11 +124,7 @@ function WhyMisleadingCard({ whyMisleading }: { whyMisleading: string }) {
   );
 }
 
-function SimplifiedExplanation({
-  explanation,
-}: {
-  explanation: string;
-}) {
+function SimplifiedExplanation({ explanation }: { explanation: string }) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
@@ -186,14 +182,75 @@ function SimplifiedExplanation({
 
 export function AnalysisResultPanel({ result }: AnalysisResultPanelProps) {
   const [showSources, setShowSources] = useState(true);
+  const [copyState, setCopyState] = useState<"idle" | "copied">("idle");
+
+  const sourcePublishers = Array.from(
+    new Set(result.sources.map((source) => source.publisher))
+  );
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(result.claim);
+      setCopyState("copied");
+      window.setTimeout(() => setCopyState("idle"), 1600);
+    } catch (error) {
+      console.error("Failed to copy claim", error);
+    }
+  };
+
+  const handleShare = async () => {
+    const shareData = {
+      title: "Facticity fact check",
+      text: `${result.claim}\n\nVerdict: ${result.verdict}\nTrust score: ${result.trustScore}`,
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(shareData.text);
+      }
+    } catch (error) {
+      console.error("Share action failed", error);
+    }
+  };
 
   return (
     <div className="space-y-5 animate-in fade-in duration-500">
+      <div className="rounded-2xl border border-blue-200 bg-linear-to-r from-blue-50 via-white to-emerald-50 p-5 shadow-sm dark:border-blue-900/40 dark:from-blue-950/40 dark:via-zinc-900 dark:to-emerald-950/20">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-blue-700 dark:text-blue-300">
+              Fact-check target
+            </p>
+            <p className="mt-2 text-base font-medium text-zinc-900 dark:text-zinc-100">
+              {result.claim}
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {sourcePublishers.length > 0 ? (
+              sourcePublishers.map((publisher) => (
+                <span
+                  key={publisher}
+                  className="rounded-full border border-zinc-200 bg-white px-3 py-1 text-xs font-medium text-zinc-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300"
+                >
+                  {publisher}
+                </span>
+              ))
+            ) : (
+              <span className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-300">
+                No source matches found
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+
       {/* Verdict + Trust Score Header */}
       <div className="flex flex-col sm:flex-row gap-4 items-stretch">
         <div className="flex-1 bg-white dark:bg-zinc-900 rounded-2xl p-6 shadow-lg border border-zinc-200 dark:border-zinc-800 flex flex-col items-center justify-center text-center">
           <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-3">
-            Verdict
+            Fact-Check Verdict
           </span>
           <VerdictBadge verdict={result.verdict as Verdict} size="lg" />
           <p className="mt-4 text-sm text-zinc-600 dark:text-zinc-400 max-w-xs">
@@ -208,7 +265,7 @@ export function AnalysisResultPanel({ result }: AnalysisResultPanelProps) {
       {/* Full Explanation */}
       <div className="bg-white dark:bg-zinc-900 rounded-xl p-5 border border-zinc-200 dark:border-zinc-800 shadow-sm">
         <h4 className="font-semibold text-zinc-900 dark:text-zinc-100 mb-3">
-          AI Analysis
+          Source-Backed Analysis
         </h4>
         <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
           {result.explanation}
@@ -216,10 +273,14 @@ export function AnalysisResultPanel({ result }: AnalysisResultPanelProps) {
       </div>
 
       {/* Why Misleading */}
-      <WhyMisleadingCard whyMisleading={result.whyMisleading} />
+      {result.whyMisleading && (
+        <WhyMisleadingCard whyMisleading={result.whyMisleading} />
+      )}
 
       {/* Bias Analysis */}
-      <BiasCard bias={result.bias} biasExplanation={result.biasExplanation} />
+      {result.biasExplanation && (
+        <BiasCard bias={result.bias} biasExplanation={result.biasExplanation} />
+      )}
 
       {/* Core Claim */}
       <ClaimBreakdownCard coreClaim={result.coreClaim} />
@@ -247,7 +308,7 @@ export function AnalysisResultPanel({ result }: AnalysisResultPanelProps) {
               </svg>
             </span>
             <h4 className="font-semibold text-zinc-900 dark:text-zinc-100">
-              Reliable Sources
+              Reference Sources
             </h4>
             <span className="text-xs text-zinc-400 dark:text-zinc-500">
               ({result.sources.length})
@@ -272,9 +333,15 @@ export function AnalysisResultPanel({ result }: AnalysisResultPanelProps) {
 
         {showSources && (
           <div className="px-5 pb-5 grid gap-3">
-            {result.sources.map((source) => (
-              <SourceCard key={source.id} source={source} />
-            ))}
+            {result.sources.length > 0 ? (
+              result.sources.map((source) => (
+                <SourceCard key={source.id} source={source} />
+              ))
+            ) : (
+              <div className="rounded-xl border border-dashed border-zinc-200 bg-zinc-50 p-4 text-sm text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900/50 dark:text-zinc-400">
+                No matching Wikipedia or Britannica references were returned for this claim yet.
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -284,7 +351,11 @@ export function AnalysisResultPanel({ result }: AnalysisResultPanelProps) {
 
       {/* Actions */}
       <div className="flex items-center justify-center gap-3 pt-2">
-        <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 rounded-lg hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors">
+        <button
+          type="button"
+          onClick={handleCopy}
+          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 rounded-lg hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+        >
           <svg
             className="w-4 h-4"
             fill="none"
@@ -298,9 +369,13 @@ export function AnalysisResultPanel({ result }: AnalysisResultPanelProps) {
               d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184"
             />
           </svg>
-          Copy
+          {copyState === "copied" ? "Copied" : "Copy Claim"}
         </button>
-        <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 rounded-lg hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors">
+        <button
+          type="button"
+          onClick={handleShare}
+          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 rounded-lg hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+        >
           <svg
             className="w-4 h-4"
             fill="none"

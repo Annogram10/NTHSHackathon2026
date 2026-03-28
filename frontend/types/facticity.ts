@@ -10,6 +10,8 @@ export interface Source {
   summary: string;
   url: string;
   credibilityScore: number;
+  sourceType: string;
+  reliabilityLabel: string;
 }
 
 export interface AnalysisResult {

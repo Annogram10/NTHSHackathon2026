@@ -28,9 +28,9 @@ const steps = [
   },
   {
     number: 2,
-    title: "AI Analysis",
+    title: "Search Sources",
     description:
-      "Our AI breaks down the claim, compares it against trusted sources, and detects bias.",
+      "We look for relevant material in sources like Wikipedia and Britannica, then compare the claim with the evidence.",
     icon: (
       <svg
         className="w-5 h-5"
@@ -51,7 +51,7 @@ const steps = [
     number: 3,
     title: "Get Verdict",
     description:
-      "Receive a detailed report with trust score, explanation, and source links.",
+      "Receive a verdict, confidence score, explanation, and direct links to the source material used.",
     icon: (
       <svg
         className="w-5 h-5"
@@ -82,7 +82,7 @@ export function HowItWorksSection() {
             How it works
           </h2>
           <p className="mt-4 text-lg text-zinc-600 dark:text-zinc-400">
-            Three simple steps to verify any claim
+            Three steps from claim to evidence-backed verdict
           </p>
         </div>
 

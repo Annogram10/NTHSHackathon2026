@@ -1,183 +1,195 @@
 import { AnalysisResult, HistoryItem } from "@/types/facticity";
-import { mockAnalysisResult, mockHistoryItems } from "./mockData";
 
-// Simulated API delay
-const ANALYZE_DELAY_MS = 2200;
+export interface AnalysisInput {
+  claim?: string;
+  sourceUrl?: string;
+  publisher?: string;
+  author?: string;
+}
 
-// Future: Replace with actual API call to FastAPI backend
-// import { apiClient } from './apiClient';
-// export async function analyzeClaim(claim: string): Promise<AnalysisResult> {
-//   return apiClient.post('/api/v1/analyze', { claim });
-// }
+// API Configuration
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-// Mock implementation for demo
-export async function analyzeClaim(claim: string): Promise<AnalysisResult> {
-  // Simulate network delay
-  await new Promise((resolve) => setTimeout(resolve, ANALYZE_DELAY_MS));
+// Types for API responses
+interface ApiAnalysisResponse {
+  success: boolean;
+  data: {
+    id: string;
+    claim: string;
+    verdict: string;
+    trust_score: number;
+    confidence: number;
+    explanation: string;
+    why_misleading?: string;
+    bias_analysis?: string;
+    core_claim: string;
+    sources: Array<{
+      id: string;
+      title: string;
+      publisher: string;
+      summary: string;
+      url: string;
+      reliability: string;
+      published_at?: string;
+    }>;
+    timestamp: string;
+  };
+}
 
-  // Keyword-based mock selection
-  const lowerClaim = claim.toLowerCase();
+interface ApiHistoryResponse {
+  success: boolean;
+  data: Array<{
+    id: string;
+    claim: string;
+    verdict: string;
+    trust_score: number;
+    timestamp: string;
+  }>;
+}
 
-  if (
-    lowerClaim.includes("flat") ||
-    lowerClaim.includes("shape of the earth") ||
-    lowerClaim.includes("globe")
-  ) {
-    return {
-      ...mockAnalysisResult,
-      id: `result-${Date.now()}`,
-      claim,
-      verdict: "False",
-      trustScore: 15,
-      confidence: 98,
-      explanation:
-        "The claim that the Earth is flat is demonstrably false. Satellite imagery, circumnavigation, physics, and thousands of years of observations confirm Earth is an oblate spheroid.",
-      whyMisleading:
-        "Flat Earth claims ignore overwhelming scientific evidence and rely on conspiracy thinking. No credible scientific institution supports this claim.",
-      analyzedAt: new Date().toISOString(),
-    };
+function normalizeVerdict(verdict: string): AnalysisResult["verdict"] {
+  switch (verdict.toLowerCase()) {
+    case "true":
+      return "True";
+    case "false":
+      return "False";
+    case "misleading":
+      return "Misleading";
+    default:
+      return "Unverifiable";
+  }
+}
+
+function normalizeBias(bias?: string): AnalysisResult["bias"] {
+  if (!bias) {
+    return "Unknown";
   }
 
-  if (
-    lowerClaim.includes("vaccine") ||
-    lowerClaim.includes("covid") ||
-    lowerClaim.includes("infertility")
-  ) {
-    return {
-      ...mockAnalysisResult,
-      id: `result-${Date.now()}`,
-      claim,
-      verdict: "False",
-      trustScore: 18,
-      confidence: 94,
-      explanation:
-        "Extensive research involving hundreds of thousands of participants has found no link between COVID-19 vaccines and infertility. Multiple peer-reviewed studies confirm this.",
-      whyMisleading:
-        "This claim originated from misinterpreted preliminary data and has been repeatedly debunked by major health organizations worldwide.",
-      analyzedAt: new Date().toISOString(),
-    };
+  const lowered = bias.toLowerCase();
+
+  if (lowered.includes("left")) {
+    return "Left";
   }
 
-  if (
-    lowerClaim.includes("econom") ||
-    lowerClaim.includes("job") ||
-    lowerClaim.includes("unemployment")
-  ) {
-    return {
-      ...mockAnalysisResult,
-      id: `result-${Date.now()}`,
-      claim,
-      verdict: "Unverifiable",
-      trustScore: 42,
-      confidence: 45,
-      explanation:
-        "Job statistics require specific time periods, geographic scope, and methodology to verify. General claims about job numbers without supporting data cannot be confirmed.",
-      whyMisleading:
-        "Economic statistics are often cherry-picked or presented without proper context, methodology, or consideration of seasonal adjustments.",
-      analyzedAt: new Date().toISOString(),
-    };
+  if (lowered.includes("right")) {
+    return "Right";
   }
 
-  if (
-    lowerClaim.includes("water") ||
-    lowerClaim.includes("health") ||
-    lowerClaim.includes("drinking")
-  ) {
-    return {
-      ...mockAnalysisResult,
-      id: `result-${Date.now()}`,
-      claim,
-      verdict: "Unverifiable",
-      trustScore: 48,
-      confidence: 52,
-      explanation:
-        "The '8 glasses a day' rule lacks strong scientific backing. While hydration is important, individual water needs vary significantly based on body size, activity level, climate, and diet.",
-      whyMisleading:
-        "This claim has been repeated so often it became accepted as fact, despite weak scientific evidence for this specific number.",
-      analyzedAt: new Date().toISOString(),
-    };
+  if (lowered.includes("center")) {
+    return "Center";
   }
 
-  if (
-    lowerClaim.includes("social media") ||
-    lowerClaim.includes("depression") ||
-    lowerClaim.includes("teenager")
-  ) {
-    return {
-      ...mockAnalysisResult,
-      id: `result-${Date.now()}`,
-      claim,
-      verdict: "Misleading",
-      trustScore: 55,
-      confidence: 68,
-      explanation:
-        "Research shows correlation but not causation between social media use and depression in teenagers. The relationship is complex and influenced by many factors including pre-existing mental health, usage patterns, and content consumed.",
-      whyMisleading:
-        "Oversimplified headlines often claim direct causation when studies only show correlation. The direction of causality remains debated among researchers.",
-      analyzedAt: new Date().toISOString(),
-    };
+  if (lowered.includes("neutral")) {
+    return "Neutral";
   }
 
-  if (
-    lowerClaim.includes("climate") ||
-    lowerClaim.includes("hurricane") ||
-    lowerClaim.includes("warming")
-  ) {
-    return {
-      ...mockAnalysisResult,
-      id: `result-${Date.now()}`,
-      claim,
-      verdict: "True",
-      trustScore: 89,
-      confidence: 82,
-      explanation:
-        "Multiple peer-reviewed studies confirm that climate change is increasing hurricane intensity, though not necessarily frequency. Warmer oceans provide more energy for tropical storms.",
-      whyMisleading:
-        "The relationship is complex — while hurricane frequency hasn't clearly increased, the intensity and rainfall rates have, making this claim largely true but requiring nuance.",
-      analyzedAt: new Date().toISOString(),
-    };
+  return "Unknown";
+}
+
+function getCredibilityScore(reliability: string, publisher: string): number {
+  const sourceName = publisher.toLowerCase();
+
+  if (sourceName.includes("britannica")) {
+    return 97;
   }
 
-  if (
-    lowerClaim.includes("ai") ||
-    lowerClaim.includes("turing") ||
-    lowerClaim.includes("artificial") ||
-    lowerClaim.includes("replace") ||
-    lowerClaim.includes("job")
-  ) {
-    return {
-      ...mockAnalysisResult,
-      id: `result-${Date.now()}`,
-      claim,
-      verdict: "False",
-      trustScore: 22,
-      confidence: 88,
-      explanation:
-        "AI cannot reliably pass a rigorous, blind Turing Test, and predictions of mass job displacement by specific dates have consistently proven overly pessimistic. AI augments rather than replaces most human roles.",
-      whyMisleading:
-        "Both AI proponents and critics tend to overstate capabilities and impacts. Current AI has significant limitations and has consistently taken longer to adopt than predicted.",
-      analyzedAt: new Date().toISOString(),
-    };
+  if (sourceName.includes("wikipedia")) {
+    return 90;
   }
 
-  // Default fallback
+  if (reliability === "high") {
+    return 92;
+  }
+
+  if (reliability === "medium") {
+    return 76;
+  }
+
+  return 60;
+}
+
+// Helper function to make API calls
+async function apiCall<T>(endpoint: string, options?: RequestInit): Promise<T> {
+  const url = `${API_BASE_URL}${endpoint}`;
+
+  try {
+    const response = await fetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...options?.headers,
+      },
+      ...options,
+    });
+
+    if (!response.ok) {
+      throw new Error(`API call failed: ${response.status} ${response.statusText}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error(`API call to ${endpoint} failed:`, error);
+    throw error;
+  }
+}
+
+// Real API implementation
+export async function analyzeClaim(input: AnalysisInput): Promise<AnalysisResult> {
+  const response = await apiCall<ApiAnalysisResponse>('/api/analyze', {
+    method: 'POST',
+    body: JSON.stringify({
+      claim: input.claim || undefined,
+      source_url: input.sourceUrl || undefined,
+      publisher: input.publisher || undefined,
+      author: input.author || undefined,
+    }),
+  });
+
+  if (!response.success) {
+    throw new Error('Analysis failed');
+  }
+
+  const data = response.data;
+
+  // Transform API response to frontend format
   return {
-    ...mockAnalysisResult,
-    id: `result-${Date.now()}`,
-    claim,
-    verdict: "Unverifiable",
-    trustScore: 50,
-    confidence: 55,
-    explanation:
-      "This claim is too broad or lacks specific data to verify. Try providing more context, specific statistics, or verifiable facts.",
-    whyMisleading:
-      "Without specific sources or data points, we cannot assess the accuracy of this claim. Precision matters when evaluating truth.",
-    analyzedAt: new Date().toISOString(),
+    id: data.id,
+    claim: data.claim,
+    verdict: normalizeVerdict(data.verdict),
+    trustScore: data.trust_score,
+    confidence: data.confidence,
+    explanation: data.explanation,
+    whyMisleading: data.why_misleading || '',
+    bias: normalizeBias(data.bias_analysis),
+    biasExplanation: data.bias_analysis || '',
+    coreClaim: data.core_claim,
+    sources: data.sources.map(source => ({
+      id: source.id,
+      title: source.title,
+      publisher: source.publisher,
+      publishedAt: source.published_at || '',
+      summary: source.summary || `Reference material from ${source.publisher}.`,
+      url: source.url,
+      credibilityScore: getCredibilityScore(source.reliability, source.publisher),
+      sourceType: source.publisher,
+      reliabilityLabel: source.reliability,
+    })),
+    simplifiedExplanation: data.explanation,
+    analyzedAt: data.timestamp,
   };
 }
 
 export async function getHistory(): Promise<HistoryItem[]> {
-  // Simulate network delay
-  await new Promise((resolve) => setTimeout(resolve, 500));
-  return mockHistoryItems;
+  const response = await apiCall<ApiHistoryResponse>('/api/history');
+
+  if (!response.success) {
+    throw new Error('Failed to fetch history');
+  }
+
+  return response.data.map(item => ({
+    id: item.id,
+    claim: item.claim,
+    verdict: normalizeVerdict(item.verdict),
+    trustScore: item.trust_score,
+    analyzedAt: item.timestamp,
+  }));
 }

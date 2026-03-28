@@ -19,7 +19,7 @@ const useCases = [
     ),
     title: "News Articles",
     description:
-      "Verify claims in breaking news before sharing. Understand the full context behind headlines.",
+      "Check headline claims against reference sources before you repost or cite them.",
     color: "blue",
   },
   {
@@ -40,7 +40,7 @@ const useCases = [
     ),
     title: "Social Posts",
     description:
-      "Fact-check viral posts, memes, and claims circulating on social platforms.",
+      "Run viral posts and meme captions through a quick evidence check.",
     color: "purple",
   },
   {
@@ -61,7 +61,7 @@ const useCases = [
     ),
     title: "YouTube Transcripts",
     description:
-      "Analyze what podcast hosts and YouTubers claim — get the sources they omitted.",
+      "Review factual claims from creators and compare them with accessible reference material.",
     color: "red",
   },
   {
@@ -82,7 +82,7 @@ const useCases = [
     ),
     title: "Podcasts & Interviews",
     description:
-      "Verify guest claims and statistics in long-form audio content.",
+      "Double-check statistics and historical references mentioned in long-form conversations.",
     color: "emerald",
   },
 ];
@@ -126,7 +126,7 @@ export function UseCasesSection() {
             Use cases
           </h2>
           <p className="mt-4 text-lg text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto">
-            Facticity works wherever you encounter claims that need verification
+            Facticity works best anywhere a fast reference-source check would help
           </p>
         </div>
 

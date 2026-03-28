@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { AnalysisResult, HistoryItem } from "@/types/facticity";
-import { analyzeClaim, getHistory } from "@/lib/analysisService";
+import { analyzeClaim, AnalysisInput, getHistory } from "@/lib/analysisService";
 import { DemoInput } from "./DemoInput";
 import { AnalysisResultPanel } from "./AnalysisResultPanel";
 import { HistoryPanel } from "./HistoryPanel";
@@ -13,6 +13,7 @@ export function DemoSection() {
   const [isLoading, setIsLoading] = useState(false);
   const [isHistoryLoading, setIsHistoryLoading] = useState(true);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadHistory = async () => {
@@ -28,15 +29,16 @@ export function DemoSection() {
     loadHistory();
   }, []);
 
-  const handleAnalyze = async (claim: string) => {
+  const handleAnalyze = async (input: AnalysisInput) => {
     setIsLoading(true);
     setIsTransitioning(true);
+    setError(null);
 
     // Brief transition delay for smooth animation
     await new Promise((resolve) => setTimeout(resolve, 100));
 
     try {
-      const analysisResult = await analyzeClaim(claim);
+      const analysisResult = await analyzeClaim(input);
       setResult(analysisResult);
 
       // Update history
@@ -50,6 +52,10 @@ export function DemoSection() {
       setHistory((prev) => [newHistoryItem, ...prev.slice(0, 9)]);
     } catch (error) {
       console.error("Analysis failed:", error);
+      setResult(null);
+      setError(
+        "We could not complete the fact check right now. Make sure the backend is running so Wikipedia and Britannica sources can be queried."
+      );
     } finally {
       setIsLoading(false);
       setTimeout(() => setIsTransitioning(false), 300);
@@ -58,7 +64,7 @@ export function DemoSection() {
 
   const handleHistorySelect = (claim: string) => {
     if (!isLoading) {
-      handleAnalyze(claim);
+      handleAnalyze({ claim });
       // Scroll to demo section
       document.getElementById("demo")?.scrollIntoView({ behavior: "smooth" });
     }
@@ -75,8 +81,19 @@ export function DemoSection() {
             Try Facticity
           </h2>
           <p className="mt-4 text-lg text-zinc-600 dark:text-zinc-400">
-            Paste any claim and get an instant truth score
+            Check a claim against source databases and get a source-backed verdict
           </p>
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-3 text-sm text-zinc-500 dark:text-zinc-400">
+            <span className="rounded-full border border-zinc-200 bg-white px-3 py-1.5 dark:border-zinc-800 dark:bg-zinc-900">
+              Wikipedia summaries
+            </span>
+            <span className="rounded-full border border-zinc-200 bg-white px-3 py-1.5 dark:border-zinc-800 dark:bg-zinc-900">
+              Britannica references
+            </span>
+            <span className="rounded-full border border-zinc-200 bg-white px-3 py-1.5 dark:border-zinc-800 dark:bg-zinc-900">
+              Evidence links
+            </span>
+          </div>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-6">
@@ -97,6 +114,12 @@ export function DemoSection() {
                 <AnalysisResultPanel result={result} />
               )}
             </div>
+
+            {error && !isLoading && (
+              <div className="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-200">
+                {error}
+              </div>
+            )}
 
             {/* Loading skeleton */}
             {isLoading && (

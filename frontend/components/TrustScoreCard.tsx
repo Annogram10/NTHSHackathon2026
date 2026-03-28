@@ -25,7 +25,7 @@ export function TrustScoreCard({ score, confidence }: TrustScoreCardProps) {
     <div className="bg-white dark:bg-zinc-900 rounded-2xl p-5 border border-zinc-200 dark:border-zinc-800 shadow-sm">
       <div className="flex items-center justify-between mb-3">
         <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
-          Trust Score
+          Fact-Check Score
         </span>
         <span className={`text-2xl font-bold ${scoreColor.text}`}>{score}</span>
       </div>
@@ -40,7 +40,7 @@ export function TrustScoreCard({ score, confidence }: TrustScoreCardProps) {
 
       {/* Confidence */}
       <div className="flex items-center justify-between pt-2 border-t border-zinc-100 dark:border-zinc-800">
-        <span className="text-xs text-zinc-500 dark:text-zinc-500">Confidence</span>
+        <span className="text-xs text-zinc-500 dark:text-zinc-500">Evidence confidence</span>
         <div className="flex items-center gap-2">
           <span className={`text-sm font-semibold ${confidenceInfo.color}`}>
             {confidenceInfo.label}

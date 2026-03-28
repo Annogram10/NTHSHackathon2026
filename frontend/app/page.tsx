@@ -3,9 +3,9 @@ import "./globals.css";
 import { DemoSection, HowItWorksSection, FeatureSection, UseCasesSection } from "@/components";
 
 export const metadata: Metadata = {
-  title: "Facticity - AI Trust Layer for the Internet",
+  title: "Facticity - Source-Backed Fact Checking",
   description:
-    "Facticity is an AI-powered trust layer that analyzes any claim, headline, or statement and delivers transparent, source-backed truth scores.",
+    "Facticity fact-checks claims against source databases like Wikipedia and Britannica, then explains the verdict with linked evidence.",
 };
 
 export default function Home() {
@@ -79,24 +79,22 @@ export default function Home() {
                   Facticity
                 </span>
                 <span className="text-xs text-blue-600/70 dark:text-blue-400/50 font-medium">
-                  AI Trust Layer
+                  Reference Fact Checker
                 </span>
               </div>
 
               {/* Headline */}
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-zinc-900 dark:text-zinc-50 tracking-tight leading-tight">
-                See through the noise.
+                Check claims against
                 <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-emerald-600">
-                  Know the truth.
+                  trusted reference sources.
                 </span>
               </h1>
 
               {/* Subheadline */}
               <p className="mt-6 text-lg sm:text-xl text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto leading-relaxed">
-                Facticity is an AI-powered trust layer that analyzes any claim,
-                headline, or statement and delivers transparent, source-backed
-                truth scores.
+                Facticity compares claims with evidence from sources like Wikipedia and Britannica, then turns that research into a clear verdict, score, and source list.
               </p>
 
               {/* CTA Buttons */}
@@ -143,7 +141,7 @@ export default function Home() {
                       clipRule="evenodd"
                     />
                   </svg>
-                  <span>100% Free</span>
+                  <span>Wikipedia + Britannica</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <svg
@@ -157,7 +155,7 @@ export default function Home() {
                       clipRule="evenodd"
                     />
                   </svg>
-                  <span>Instant results</span>
+                  <span>Source-backed verdicts</span>
                 </div>
               </div>
             </div>
@@ -190,8 +188,7 @@ export default function Home() {
                 </span>
               </div>
               <p className="text-sm text-zinc-500 dark:text-zinc-500">
-                AI-powered trust layer for the internet. Fighting misinformation
-                with transparency.
+                Source-backed fact checking for the internet, built to keep the evidence visible.
               </p>
               <p className="text-xs text-zinc-400 dark:text-zinc-600">
                 Built for NTHS Hackathon 2026

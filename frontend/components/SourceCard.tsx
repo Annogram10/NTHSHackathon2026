@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Source } from "@/types/facticity";
 
 interface SourceCardProps {
@@ -7,10 +8,36 @@ interface SourceCardProps {
 }
 
 export function SourceCard({ source }: SourceCardProps) {
+  const [copyState, setCopyState] = useState<"idle" | "copied">("idle");
+
   const getCredibilityColor = (score: number) => {
     if (score >= 90) return "text-emerald-600";
     if (score >= 75) return "text-amber-600";
     return "text-red-600";
+  };
+
+  const publishedLabel = source.publishedAt
+    ? new Date(source.publishedAt).toString() !== "Invalid Date"
+      ? new Date(source.publishedAt).toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        })
+      : "Reference source"
+    : "Reference source";
+
+  const handleCopy = async () => {
+    if (!source.url) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(source.url);
+      setCopyState("copied");
+      window.setTimeout(() => setCopyState("idle"), 1600);
+    } catch (error) {
+      console.error("Failed to copy source URL", error);
+    }
   };
 
   return (
@@ -32,13 +59,12 @@ export function SourceCard({ source }: SourceCardProps) {
         <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
           {source.publisher}
         </span>
+        <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
+          {source.reliabilityLabel}
+        </span>
         <span className="text-zinc-300 dark:text-zinc-600">·</span>
         <span className="text-xs text-zinc-400 dark:text-zinc-500">
-          {new Date(source.publishedAt).toLocaleDateString("en-US", {
-            month: "short",
-            day: "numeric",
-            year: "numeric",
-          })}
+          {publishedLabel}
         </span>
       </div>
 
@@ -47,7 +73,12 @@ export function SourceCard({ source }: SourceCardProps) {
       </p>
 
       <div className="flex items-center gap-2">
-        <button className="text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-1 transition-colors">
+        <a
+          href={source.url}
+          target="_blank"
+          rel="noreferrer"
+          className="text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-1 transition-colors"
+        >
           <svg
             className="w-3.5 h-3.5"
             fill="none"
@@ -62,8 +93,12 @@ export function SourceCard({ source }: SourceCardProps) {
             />
           </svg>
           View Source
-        </button>
-        <button className="text-xs font-medium text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 flex items-center gap-1 transition-colors">
+        </a>
+        <button
+          type="button"
+          onClick={handleCopy}
+          className="text-xs font-medium text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 flex items-center gap-1 transition-colors"
+        >
           <svg
             className="w-3.5 h-3.5"
             fill="none"
@@ -77,7 +112,7 @@ export function SourceCard({ source }: SourceCardProps) {
               d="M8.25 7.5V6.108c0-1.135.845-2.098 1.976-2.192a3.52 3.52 0 012.264-.14l3.924 3.924a3.52 3.52 0 012.264.14c1.131.094 1.976 1.057 1.976 2.192v1.392m-6.256 0v6.108c0 1.135-.845 2.098-1.976 2.192a3.52 3.52 0 01-2.264-.14l-3.924-3.924a3.52 3.52 0 01-2.264-.14c-1.131-.094-1.976-1.057-1.976-2.192V9.108m6.256-3.75v3.75m0 0v3.75m0-3.75h3.75m-3.75 0h-3.75"
             />
           </svg>
-          Copy Link
+          {copyState === "copied" ? "Copied" : "Copy Link"}
         </button>
       </div>
     </div>

@@ -19,7 +19,7 @@ const features = [
     ),
     title: "Multi-Source Verification",
     description:
-      "Cross-references claims against thousands of trusted sources to identify consensus and contradictions.",
+      "Cross-references claims against research-style reference sources, including Wikipedia and Britannica, to identify agreement and contradictions.",
     color: "blue",
   },
   {
@@ -40,7 +40,7 @@ const features = [
     ),
     title: "Bias Detection",
     description:
-      "Identifies potential framing bias, loaded language, and partisan framing in source materials.",
+      "Highlights loaded framing and missing context so the verdict is not just a number.",
     color: "amber",
   },
   {
@@ -61,7 +61,7 @@ const features = [
     ),
     title: "Trust Scoring",
     description:
-      "Quantitative trust and confidence scores help you understand the reliability of claims at a glance.",
+      "A simple score and confidence readout help you judge how strongly the available sources support the claim.",
     color: "emerald",
   },
   {
@@ -82,7 +82,7 @@ const features = [
     ),
     title: "Source Transparency",
     description:
-      "Every analysis links back to original sources with credibility ratings and context.",
+      "Every analysis links back to the underlying references so you can inspect the evidence yourself.",
     color: "purple",
   },
 ];
@@ -123,11 +123,10 @@ export function FeatureSection() {
       <div className="max-w-5xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-16">
           <h2 className="text-3xl sm:text-4xl font-bold text-zinc-900 dark:text-zinc-50 tracking-tight">
-            Built for truth-seekers
+            Built for source-based fact checking
           </h2>
           <p className="mt-4 text-lg text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto">
-            A powerful suite of tools designed to cut through misinformation and
-            provide transparent, source-backed analysis.
+            The frontend is designed to keep the evidence visible, not hidden behind a black-box answer.
           </p>
         </div>
 
